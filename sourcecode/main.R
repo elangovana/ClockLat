@@ -22,8 +22,7 @@ calcLinearRegression<- function(postsData){
   lm_model <-lm(formula, data= postsData)
   print(summary(lm_model))
   
-  #longitude
-  
+  #longitude 
   formula <- as.formula(paste(paste(lon,"~"),factors))
   print("Formula for longitude used: ")
   print(formula)
