@@ -1,37 +1,6 @@
-###Colnames
-hour1 <- "Hour1"
-id <- "Id"
-hour2 <- "Hour2"
-hour3 <- "Hour3"
-lat <- "Lat"
-lon <- "Lon"
-posts <- "Posts"
+source("./globals.R")
+source("./linearRegressionModel.R")
 
-
-############################
-##linear regression model##
-#############################
-calcLinearRegression<- function(postsData){
-
-  factors <- paste(c(hour1,hour2, hour3, posts),collapse="+")
-  
-  ## latitude
-  formula <- as.formula(paste(paste(lat,"~"),factors))
-  print("Formula for lat used: ")
-  print(formula)
-  lm_model <-lm(formula, data= postsData)
-  print(summary(lm_model))
-  
-  #longitude 
-  formula <- as.formula(paste(paste(lon,"~"),factors))
-  print("Formula for longitude used: ")
-  print(formula)
-  lm_model <-lm(formula, data= postsData)
-  print(summary(lm_model))
-  lm_model
-  
-  
-}
 
 ##########################
 ## Main #################
