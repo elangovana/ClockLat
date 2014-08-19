@@ -1,3 +1,13 @@
+###Colnames
+hour1 <- "Hour1"
+id <- "Id"
+hour2 <- "Hour2"
+hour3 <- "Hour3"
+lat <- "Lat"
+lon <- "Lon"
+posts <- "Posts"
+
+
 ############################
 ##linear regression model##
 #############################
@@ -8,18 +18,20 @@ calcLinearRegression<- function(postsData){
   ## latitude
   formula <- as.formula(paste(paste(lat,"~"),factors))
   print("Formula for lat used: ")
-  formula
+  print(formula)
   lm_model <-lm(formula, data= postsData)
-  summary(lm_model)
+  print(summary(lm_model))
   
   #longitude
   
   formula <- as.formula(paste(paste(lon,"~"),factors))
   print("Formula for longitude used: ")
-  formula
+  print(formula)
   lm_model <-lm(formula, data= postsData)
-  summary(lm_model)
+  print(summary(lm_model))
   lm_model
+  
+  
 }
 
 ##########################
@@ -42,15 +54,6 @@ if (length(args) == 2) {
   cat("Using Default dataset", fileTrainDataPosts)
 }
  
-###Colnames
-hour1 <- "Hour1"
-id <- "Id"
-hour2 <- "Hour2"
-hour3 <- "Hour3"
-lat <- "Lat"
-lon <- "Lon"
-posts <- "Posts"
-
 
 ## load data
 trainDataPosts <- read.csv(file = fileTrainDataPosts, header = TRUE)
