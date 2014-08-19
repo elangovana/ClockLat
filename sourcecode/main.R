@@ -1,4 +1,30 @@
+############################
+##linear regression model##
+#############################
+calcLinearRegression<- function(postsData){
 
+  factors <- paste(c(hour1,hour2, hour3, posts),collapse="+")
+  
+  ## latitude
+  formula <- as.formula(paste(paste(lat,"~"),factors))
+  print("Formula for lat used: ")
+  formula
+  lm_model <-lm(formula, data= postsData)
+  summary(lm_model)
+  
+  #longitude
+  
+  formula <- as.formula(paste(paste(lon,"~"),factors))
+  print("Formula for longitude used: ")
+  formula
+  lm_model <-lm(formula, data= postsData)
+  summary(lm_model)
+  lm_model
+}
+
+##########################
+## Main #################
+##########################
 options(echo=FALSE)
 args<-commandArgs(trailingOnly = TRUE)
 
@@ -31,10 +57,4 @@ trainDataPosts <- read.csv(file = fileTrainDataPosts, header = TRUE)
 colnames(trainDataPosts) <- c(id, hour1,hour2, hour3, lat, lon, posts)
 head(trainDataPosts)
 
-##linear regression model
-formula <- as.formula(paste(paste(lat,"~"),paste(c(hour1,hour2, hour3, posts),collapse="+")))
-print("Formula used: ")
-formula
-
-lm_model <-lm(formula, data= trainDataPosts)
-summary(lm_model)
+calcLinearRegression(trainDataPosts)
