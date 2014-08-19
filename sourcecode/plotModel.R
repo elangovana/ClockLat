@@ -9,7 +9,9 @@ createDir <- function(path){
 
 plotModel <- function(dataset, outDir){
   createDir(outDir)
+  
   pdf(file.path(outDir,'plots.pdf'))
+  
   plot(dataset[,hour1], dataset[,lat], main="Hour1 vs Latitude", xlab="hour1", ylab="latitude", pch=20)
   plot(dataset[,hour1], dataset[,lon], main="Hour1 vs longitude", xlab="hour1", ylab="longitude", pch=20)
   
@@ -20,7 +22,7 @@ plotModel <- function(dataset, outDir){
   plot(dataset[,hour3], dataset[,lon], main="Hour3 Vs longitude", xlab="hour3", ylab="longitude", pch=20)
   
   plot(dataset[,posts], dataset[,lat], main="posts vs latitude", xlab="posts", ylab="latitude", pch=20)
-  plot(dataset[,posts], dataset[,lon], main="posts vs Longitude", xlab="posts", ylab="latitude", pch=20)
+  plot(dataset[,posts], dataset[,lon], main="posts vs Longitude", xlab="posts", ylab="longitude", pch=20)
   
   dev.off()
 }
