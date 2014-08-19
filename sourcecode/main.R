@@ -12,7 +12,7 @@ args<-commandArgs(trailingOnly = TRUE)
 ##default data set when no args provided
 fileTrainDataPosts = "./../data/posts-train.txt"
 fileTrainDataFriends = "./../data/graph.txt"
-fileTestDataFriends = "./../data/posts-test-x.txt"
+fileTestDataPosts = "./../data/posts-test-x.txt"
 outDir = "./../output/"
 
 ## parse args for data set
@@ -28,9 +28,11 @@ if (length(args) == 2) {
 
 ## load data
 trainDataPosts <- read.csv(file = fileTrainDataPosts, header = TRUE)
-colnames(trainDataPosts) <- c(id, hour1,hour2, hour3, lat, lon, posts)
-head(trainDataPosts)
+testDataPosts <-  read.csv(file = fileTestDataPosts, header = TRUE)
 
+colnames(trainDataPosts) <- colHeaders
+head(trainDataPosts)
+head(testDataPosts)
 
 plotModel(trainDataPosts, outDir)
-calcLinearRegression(trainDataPosts)
+calcLinearRegression(trainDataPosts, testDataPosts, outDir)

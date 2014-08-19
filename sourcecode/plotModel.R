@@ -1,10 +1,5 @@
 source("./globals.R")
 
-createDir <- function(path){ 
-  if (!file.exists(path)){ 
-    dir.create(path)  
-  }
-}
 
 
 plotModel <- function(dataset, outDir){
