@@ -6,6 +6,7 @@ hour3 <- "Hour3"
 lat <- "Lat"
 lon <- "Lon"
 posts <- "Posts"
+region <- "Region"
 
 colHeaders <-  c(id, hour1,hour2, hour3, lat, lon, posts)
 

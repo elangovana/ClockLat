@@ -2,7 +2,7 @@ source("./globals.R")
 source("./plotModel.R")
 source("./linearRegressionModel.R")
 source("./MutualInfoBasedModel.R")
-
+source("./label.R")
 ##########################
 ## Main #################
 ##########################
@@ -23,6 +23,12 @@ if (length(args) == 2) {
   ##TODO: include others
 } else {
   cat("Using Default dataset", fileTrainDataPosts)
+  print("Usage: 
+        main.r TestPostsFile trainPostsFile TrainFriendsFile outputDir \n
+        where 
+            TestPostsFile is the test dataset.
+            Tests
+        ")
 }
  
 
@@ -37,3 +43,4 @@ head(testDataPosts)
 plotModel(trainDataPosts, outDir)
 calcLinearRegression(trainDataPosts, testDataPosts, outDir)
 calcCustomMutualInformation(trainDataPosts, testDataPosts, outDir)
+labelContinents(trainDataPosts, testDataPosts, outDir)
