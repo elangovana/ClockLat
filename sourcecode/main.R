@@ -13,7 +13,7 @@ args<-commandArgs(trailingOnly = TRUE)
 fileTrainDataPosts = "./../data/posts-train.txt"
 fileTrainDataFriends = "./../data/graph.txt"
 fileTestDataPosts = "./../data/posts-test-x.txt"
-outDir = "./../output/"
+outDir = "./../output"
 
 ## parse args for data set
 if (length(args) == 2) {

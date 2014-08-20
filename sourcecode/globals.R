@@ -14,3 +14,16 @@ createDir <- function(path){
     dir.create(path)  
   }
 }
+
+writePredicationAsCsv <- function(testData, predicted_lat, predicted_lon, outdir, filenamePrefix){
+  createDir(outDir)
+  
+  data <- cbind(predicted_lat,predicted_lon)
+  data <- cbind(testData, data)
+  colnames(data) <- colHeaders
+  
+  print(file.path(outDir, paste( c(filenamePrefix,"submission",'.csv'), collapse="")))
+  
+  write.csv(data[, c(id, lat,lon)], file= file.path(outDir, paste( c(filenamePrefix,"submission",'.csv'), collapse="")), row.names = FALSE,  quote = FALSE) 
+  write.table(data,  file= file.path(outDir, paste( c(filenamePrefix,'.csv'), collapse="")),  row.names = FALSE, sep=",", quote = FALSE)  
+}
