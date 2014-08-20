@@ -1,7 +1,7 @@
 source("./globals.R")
 source("./plotModel.R")
 source("./linearRegressionModel.R")
-
+source("./MutualInfoBasedModel.R")
 
 ##########################
 ## Main #################
@@ -36,3 +36,4 @@ head(testDataPosts)
 
 plotModel(trainDataPosts, outDir)
 calcLinearRegression(trainDataPosts, testDataPosts, outDir)
+calcCustomMutualInformation(trainDataPosts, testDataPosts, outDir)
