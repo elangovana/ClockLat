@@ -19,5 +19,12 @@ plotModel <- function(dataset, outDir){
   plot(dataset[,posts], dataset[,lat], main="posts vs latitude", xlab="posts", ylab="latitude", pch=20)
   plot(dataset[,posts], dataset[,lon], main="posts vs Longitude", xlab="posts", ylab="longitude", pch=20)
   
+  plot(dataset[,hour1], dataset[,hour2], main="Hour1 vs Hour2", xlab="hour1", ylab="hour2", pch=20)  
+  plot(dataset[,hour2], dataset[,hour3], main="Hour2 vs Hour3", xlab="hour2", ylab="hour3", pch=20)  
+  plot(dataset[,hour1], dataset[,hour3], main="Hour1 vs Hour3", xlab="hour1", ylab="hour3", pch=20)
+  
+  plot(dataset[,lon], dataset[,lat], main="lattitude vs longitude", xlab="lon", ylab="lat", pch=20)
+  
+  
   dev.off()
 }
