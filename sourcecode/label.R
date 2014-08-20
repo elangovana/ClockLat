@@ -33,19 +33,18 @@ plotMappedModel <- function(dataset, outDir){
   
   pdf(file.path(outDir,'plotregions.pdf'))
   
-  plot(dataset[,hour1], dataset[,region], main="Hour1 vs Latitude", xlab="hour1", ylab="region")
-  plot(dataset[,region], dataset[,hour1], main="Hour1 vs Latitude", xlab="region", ylab="hour1")
+  plot(dataset[,hour1], dataset[,region], main="Hour1 vs region", xlab="hour1", ylab="region")
+  plot(dataset[,region], dataset[,hour1], main="Hour1 vs region", xlab="region", ylab="hour1")
   
-  plot(dataset[,posts], dataset[,region], main="posts vs Latitude", xlab="posts", ylab="region")
-  plot(dataset[,region], dataset[,posts], main="posts vs Latitude", xlab="region", ylab="posts")
+  plot(dataset[,posts], dataset[,region], main="posts vs region", xlab="posts", ylab="region")
+  plot(dataset[,region], dataset[,posts], main="posts vs region", xlab="region", ylab="posts")
   
-  plot(dataset[,region], dataset[,hour2], main="Hour2 Vs latitude", xlab="hour2", ylab="region")
+  plot(dataset[,region], dataset[,hour2], main="Hour2 Vs region", xlab="hour2", ylab="region")
  
   
   
   dev.off()
 }
-
 
 
 labelContinents <- function(trainData, testData, outDir){
@@ -54,6 +53,8 @@ labelContinents <- function(trainData, testData, outDir){
  print(head(indices$REGION))
  data<- cbind(trainData, indices$REGION)
  colnames(data)[8] = region
- 
+
  plotMappedModel(data, outDir)
+ write.table(data,  file= file.path(outDir, "labelledcontinents.csv"),  row.names = FALSE, sep=",", quote = FALSE)
+ return(data)
 }
