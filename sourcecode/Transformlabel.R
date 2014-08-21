@@ -28,33 +28,16 @@ coords2continent = function(points)
   #indices$ISO3 # returns the ISO3 code 
 }
 
-plotMappedModel <- function(dataset, outDir){
-  createDir(outDir)
-  
-  pdf(file.path(outDir,'plotregions.pdf'))
-  
-  plot(dataset[,hour1], dataset[,region], main="Hour1 vs region", xlab="hour1", ylab="region")
-  plot(dataset[,region], dataset[,hour1], main="Hour1 vs region", xlab="region", ylab="hour1")
-  
-  plot(dataset[,posts], dataset[,region], main="posts vs region", xlab="posts", ylab="region")
-  plot(dataset[,region], dataset[,posts], main="posts vs region", xlab="region", ylab="posts")
-  
-  plot(dataset[,region], dataset[,hour2], main="Hour2 Vs region", xlab="hour2", ylab="region")
- 
-  
-  
-  dev.off()
-}
 
 
-labelContinents <- function(trainData, testData, outDir){
- indices <-  coords2continent(trainData[, c(lon, lat)])
+
+labelContinents <- function(dataset, outDir){
+ indices <-  coords2continent(dataset[, c(lon, lat)])
  
  print(head(indices$REGION))
- data<- cbind(trainData, indices$REGION)
- colnames(data)[8] = region
-
- plotMappedModel(data, outDir)
+ data<- cbind(dataset, indices$REGION)
+ names(data)[names(data) == 'indices$REGION'] <- region
+ 
  write.table(data,  file= file.path(outDir, "labelledcontinents.csv"),  row.names = FALSE, sep=",", quote = FALSE)
  return(data)
 }
