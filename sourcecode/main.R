@@ -2,6 +2,8 @@ source("./globals.R")
 source("./plotModel.R")
 source("./linearRegressionModel.R")
 source("./MutualInfoBasedModel.R")
+source("./SVMModel.R")
+source("./LinRegwithSVM.R")
 source("./label.R")
 ##########################
 ## Main #################
