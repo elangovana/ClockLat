@@ -1,29 +1,114 @@
 source("./globals.R")
 
+pkgInstall("ggplot2")
 
+multiplot <- function(..., plotlist=NULL, cols) {
+  require(grid)
+  
+  # Make a list from the ... arguments and plotlist
+  plots <- c(list(...), plotlist)
+  
+  numPlots = length(plots)
+  
+  # Make the panel
+  plotCols = cols                          # Number of columns of plots
+  plotRows = ceiling(numPlots/plotCols) # Number of rows needed, calculated from # of cols
+  
+  # Set up the page
+  grid.newpage()
+  pushViewport(viewport(layout = grid.layout(plotRows, plotCols)))
+  vplayout <- function(x, y)
+    viewport(layout.pos.row = x, layout.pos.col = y)
+  
+  # Make each plot, in the correct location
+  for (i in 1:numPlots) {
+    curRow = ceiling(i/plotCols)
+    curCol = (i-1) %% plotCols + 1
+    print(plots[[i]], vp = vplayout(curRow, curCol ))
+  }
+  
+}
 
 plotModel <- function(dataset, outDir){
   createDir(outDir)
+  library(ggplot2)
+  pdf(file.path(outDir,'plots.pdf'), onefile = TRUE)
   
-  pdf(file.path(outDir,'plots.pdf'))
+  colorGradient <- colorRampPalette(c("lightgreen","blue"))(24)
   
-  plot(dataset[,hour1], dataset[,lat], main="Hour1 vs Latitude", xlab="hour1", ylab="latitude", pch=20)
-  plot(dataset[,hour1], dataset[,lon], main="Hour1 vs longitude", xlab="hour1", ylab="longitude", pch=20)
+  print(ggplot(data = dataset, aes_string(x = lon, y = lat, col=hour1)) +
+          geom_point() +
+          scale_colour_gradientn(colours = colorGradient) +
+          theme_bw() +
+          theme(legend.position = "top") +
+          ggtitle("Hour1")
+        
+  )
   
-  plot(dataset[,hour2], dataset[,lat], main="Hour2 Vs latitude", xlab="hour2", ylab="latitude", pch=20)
-  plot(dataset[,hour2], dataset[,lon], main="Hour2 Vs longitude", xlab="hour2", ylab="longitude", pch=20)
+  print(ggplot(data = dataset, aes_string(x = lon, y = lat, col=hour2)) +
+          geom_point() +
+          scale_colour_gradientn(colours = colorGradient) +
+          theme_bw() +
+          theme(legend.position = "top") +
+          ggtitle("Hour2")
+        
+  )
   
-  plot(dataset[,hour3], dataset[,lat], main="Hour3 Vs latitude", xlab="hour3", ylab="latitude", pch=20)
-  plot(dataset[,hour3], dataset[,lon], main="Hour3 Vs longitude", xlab="hour3", ylab="longitude", pch=20)
+  print(ggplot(data = dataset, aes_string(x = lon, y = lat, col=hour3)) +
+          geom_point() +
+          scale_colour_gradientn(colours = colorGradient) +
+          theme_bw() +
+          theme(legend.position = "top") +
+          ggtitle("Hour3")
+        
+  )
   
-  plot(dataset[,posts], dataset[,lat], main="posts vs latitude", xlab="posts", ylab="latitude", pch=20)
-  plot(dataset[,posts], dataset[,lon], main="posts vs Longitude", xlab="posts", ylab="longitude", pch=20)
   
-  plot(dataset[,hour1], dataset[,hour2], main="Hour1 vs Hour2", xlab="hour1", ylab="hour2", pch=20)  
-  plot(dataset[,hour2], dataset[,hour3], main="Hour2 vs Hour3", xlab="hour2", ylab="hour3", pch=20)  
-  plot(dataset[,hour1], dataset[,hour3], main="Hour1 vs Hour3", xlab="hour1", ylab="hour3", pch=20)
   
-  plot(dataset[,lon], dataset[,lat], main="lattitude vs longitude", xlab="lon", ylab="lat", pch=20)
+  dev.off()
+  print("Complete")
+}
+
+
+plotTransformedModel <- function(dataset, outDir){
+  createDir(outDir)
+  
+  
+  
+  library(ggplot2)
+  pdf(file.path(outDir,'plotregions.pdf'), onefile = TRUE)
+  
+  colorGradient <- colorRampPalette(c("green","red", "blue"))(24)
+  
+  plothr1 <- ggplot(data = dataset, aes_string(x = lon, y = lat, col=hour1)) +
+    geom_point() +
+    scale_colour_gradientn(colours = colorGradient) +
+    theme_bw() +
+    theme(legend.position = "top") +
+    ggtitle("Hour1")
+  
+  plothr2 <- ggplot(data = dataset, aes_string(x = lon, y = lat, col=hour2)) +
+    geom_point() +
+    scale_colour_gradientn(colours = colorGradient) +
+    theme_bw() +
+    theme(legend.position = "top") +
+    ggtitle("Hour2")
+  
+  plotehr<- ggplot(data = dataset, aes_string(x = lon, y = lat, col=earliestHr)) +
+    geom_point() +
+    scale_colour_gradientn(colours = colorGradient) +
+    theme_bw() +
+    theme(legend.position = "top") +
+    ggtitle("Earliest Hour")
+  
+  plotlhr <- ggplot(data = dataset, aes_string(x = lon, y = lat, col=latestHr)) +
+    geom_point() +
+    scale_colour_gradientn(colours = colorGradient) +
+    theme_bw() +
+    theme(legend.position = "top") +
+    ggtitle("Latest Hour")
+  
+  print(multiplot(plothr1,plothr2, plotehr, plotlhr, cols=2))
   
   
   dev.off()

@@ -4,7 +4,8 @@ source("./linearRegressionModel.R")
 source("./MutualInfoBasedModel.R")
 source("./SVMModel.R")
 source("./LinRegwithSVM.R")
-source("./label.R")
+source("./Transformlabel.R")
+source("./TransformFeature.R")
 ##########################
 ## Main #################
 ##########################
@@ -38,13 +39,20 @@ if (length(args) == 2) {
 trainDataPosts <- read.csv(file = fileTrainDataPosts, header = TRUE)
 testDataPosts <-  read.csv(file = fileTestDataPosts, header = TRUE)
 
-colnames(trainDataPosts) <- colHeaders
+colnames(trainDataPosts) <- colInputTrainHeaders
+colnames(testDataPosts) <- colInputTestHeaders
+
 head(trainDataPosts)
 head(testDataPosts)
 
 plotModel(trainDataPosts, outDir)
+transformedTrainData <- transformFeatures(trainDataPosts, outDir)
+transformedTestData <- transformFeatures(testDataPosts, outDir)
+plotTransformedModel(transformedTrainData, outDir)
+
+labeledTrainDataPosts <- labelContinents(transformedTrainData,  outDir)
+labeledTestDataPosts<-calcSVM(labeledTrainDataPosts, transformedTestData, outDir)
+
 #calcLinearRegression(trainDataPosts, testDataPosts, outDir)
 #calcCustomMutualInformation(trainDataPosts, testDataPosts, outDir)
-labeledTrainDataPosts <- labelContinents(trainDataPosts, testDataPosts, outDir)
-labeledTestDataPosts<-calcSVM(labeledTrainDataPosts, testDataPosts, outDir)
 calcLinearRegwithSVMData(labeledTrainDataPosts,labeledTestDataPosts, testDataPosts, outDir)

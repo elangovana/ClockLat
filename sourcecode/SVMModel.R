@@ -20,8 +20,9 @@ calcSVM<-function(postsData, testData, outDir){
   predicted_reg <-predict(svm_model, newdata=testData)
   
   data <- cbind(testData, predicted_reg)
-  colnames(data) <- c(id, hour1,hour2, hour3,posts,region)
-  
+  print(head(data))
+  names(data)[names(data) == 'predicted_reg'] <- region
+
     
   write.table(data,  file= file.path(outDir, "labelledcontinentsforTest.csv"),  row.names = FALSE, sep=",", quote = FALSE)
   return(data)

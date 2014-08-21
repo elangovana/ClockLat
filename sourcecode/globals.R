@@ -7,8 +7,10 @@ lat <- "Lat"
 lon <- "Lon"
 posts <- "Posts"
 region <- "Region"
-
-colHeaders <-  c(id, hour1,hour2, hour3, posts, lat, lon)
+earliestHr <- "EarliestHour"
+latestHr <- "LatestHour"
+colInputTrainHeaders <-  c(id, hour1,hour2, hour3, lat, lon, posts)
+colInputTestHeaders <-  c(id, hour1,hour2, hour3,  posts)
 
 createDir <- function(path){ 
   if (!file.exists(path)){ 
@@ -21,7 +23,8 @@ writePredicationAsCsv <- function(testData, predicted_lat, predicted_lon, outdir
   
   data <- cbind(predicted_lat,predicted_lon)
   data <- cbind(testData, data)
-  colnames(data) <- colHeaders
+  names(data)[names(data) == 'predicted_lat'] <- lat
+  names(data)[names(data) == 'predicted_lon'] <- lon
   
   print(file.path(outDir, paste( c(filenamePrefix,"submission",'.csv'), collapse="")))
   
