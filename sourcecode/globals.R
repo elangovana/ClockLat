@@ -8,7 +8,7 @@ lon <- "Lon"
 posts <- "Posts"
 region <- "Region"
 
-colHeaders <-  c(id, hour1,hour2, hour3, lat, lon, posts)
+colHeaders <-  c(id, hour1,hour2, hour3, posts, lat, lon)
 
 createDir <- function(path){ 
   if (!file.exists(path)){ 
