@@ -9,6 +9,9 @@ posts <- "Posts"
 region <- "Region"
 earliestHr <- "EarliestHour"
 latestHr <- "LatestHour"
+avgHr <- "AverageHour"
+totalHr <- "TotalHour"
+
 colInputTrainHeaders <-  c(id, hour1,hour2, hour3, lat, lon, posts)
 colInputTestHeaders <-  c(id, hour1,hour2, hour3,  posts)
 

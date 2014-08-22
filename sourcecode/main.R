@@ -51,8 +51,10 @@ transformedTestData <- transformFeatures(testDataPosts, outDir)
 plotTransformedModel(transformedTrainData, outDir)
 
 labeledTrainDataPosts <- labelContinents(transformedTrainData,  outDir)
-labeledTestDataPosts<-calcSVM(labeledTrainDataPosts, transformedTestData, outDir)
 
-#calcLinearRegression(trainDataPosts, testDataPosts, outDir)
+
+calcLinearRegression(transformedTrainData, transformedTestData, outDir)
+calcLinearRegressionOnEarliestHour(transformedTrainData, transformedTestData, outDir)
 #calcCustomMutualInformation(trainDataPosts, testDataPosts, outDir)
+labeledTestDataPosts<-calcSVM(labeledTrainDataPosts, transformedTestData, outDir)
 calcLinearRegwithSVMData(labeledTrainDataPosts,labeledTestDataPosts, testDataPosts, outDir)

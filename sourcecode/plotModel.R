@@ -110,6 +110,26 @@ plotTransformedModel <- function(dataset, outDir){
   
   print(multiplot(plothr1,plothr2, plotehr, plotlhr, cols=2))
   
+  print(ggplot(data = dataset, aes_string(x = lon, y = lat, col=avgHr)) +
+          geom_point() +
+          scale_colour_gradientn(colours = colorGradient) +
+          theme_bw() +
+          theme(legend.position = "top") +
+          ggtitle("Hour1"))
+  
+  print(ggplot(data = dataset, aes_string(x = lon, y = lat, col=totalHr)) +
+          geom_point() +
+          scale_colour_gradientn(colours = colorGradient) +
+          theme_bw() +
+          theme(legend.position = "top") +
+          ggtitle("Hour1"))
+  
+  print(ggplot(data = dataset, aes_string(x = lon, y = lat, col=earliestHr)) +
+          geom_point() +
+          scale_colour_gradientn(colours = colorGradient) +
+          theme_bw() +
+          theme(legend.position = "top") +
+          ggtitle("Earliest Hour"))
   
   dev.off()
 }
