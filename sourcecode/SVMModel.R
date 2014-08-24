@@ -1,4 +1,5 @@
 source("./globals.R")
+source("./InstallPackage.R")
 
 pkgInstall("e1071")
 
