@@ -6,6 +6,7 @@ source("./SVMModel.R")
 source("./LinRegwithSVM.R")
 source("./Transformlabel.R")
 source("./TransformFeature.R")
+source("./linRegWithFriends.R")
 ##########################
 ## Main #################
 ##########################
@@ -38,6 +39,7 @@ if (length(args) == 2) {
 ## load data
 trainDataPosts <- read.csv(file = fileTrainDataPosts, header = TRUE)
 testDataPosts <-  read.csv(file = fileTestDataPosts, header = TRUE)
+trainDataFriends <- read.table(file = fileTrainDataFriends, col.names=c("Id", "FrdsId"))
 
 colnames(trainDataPosts) <- colInputTrainHeaders
 colnames(testDataPosts) <- colInputTestHeaders
@@ -56,5 +58,6 @@ labeledTrainDataPosts <- labelContinents(transformedTrainData,  outDir)
 calcLinearRegression(transformedTrainData, transformedTestData, outDir)
 calcLinearRegressionOnEarliestHour(transformedTrainData, transformedTestData, outDir)
 #calcCustomMutualInformation(trainDataPosts, testDataPosts, outDir)
-labeledTestDataPosts<-calcSVM(labeledTrainDataPosts, transformedTestData, outDir)
-calcLinearRegwithSVMData(labeledTrainDataPosts,labeledTestDataPosts, testDataPosts, outDir)
+#labeledTestDataPosts<-calcSVM(labeledTrainDataPosts, transformedTestData, outDir)
+linearRegwithFriendsList(labeledTrainDataPosts,trainDataFriends,transformedTestData,outDir)
+
