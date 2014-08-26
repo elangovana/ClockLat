@@ -11,9 +11,15 @@ earliestHr <- "EarliestHour"
 latestHr <- "LatestHour"
 avgHr <- "AverageHour"
 totalHr <- "TotalHour"
+avgFriendsLat <- "AvgFriendsLat"
+avgFriendsLon <- "AvgFriendsLon"
+closestFriendsLat <- "closestFreindsLat"
+closestFriendsLon <- "closestFriendsLon"
+friendsId <- "friendsId"
 
 colInputTrainHeaders <-  c(id, hour1,hour2, hour3, lat, lon, posts)
 colInputTestHeaders <-  c(id, hour1,hour2, hour3,  posts)
+colInputFriends <- c(id, friendsId)
 
 createDir <- function(path){ 
   if (!file.exists(path)){ 

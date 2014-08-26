@@ -132,5 +132,29 @@ plotTransformedModel <- function(dataset, outDir){
           theme(legend.position = "top") +
           ggtitle("Earliest Hour"))
   
+  print(ggplot(data = dataset, aes_string(x = closestFriendsLat, y = lat)) +
+          geom_point() +
+          theme_bw() +
+          theme(legend.position = "top") +
+          ggtitle("Lat : Closest friend vs me"))
+  
+  print(ggplot(data = dataset, aes_string(x = closestFriendsLon, y = lon)) +
+          geom_point() +
+          theme_bw() +
+          theme(legend.position = "top") +
+          ggtitle("Lon : Closest friend vs me"))
+  
+  print(ggplot(data = dataset, aes_string(x = avgFriendsLat, y = lat)) +
+          geom_point() +
+          theme_bw() +
+          theme(legend.position = "top") +
+          ggtitle("Lat : Avg friends lat vs me"))
+  
+  print(ggplot(data = dataset, aes_string(x = avgFriendsLon, y = lon)) +
+          geom_point() +
+          theme_bw() +
+          theme(legend.position = "top") +
+          ggtitle("Lon : Avg friends lon vs me"))
+  
   dev.off()
 }

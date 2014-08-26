@@ -11,6 +11,7 @@ source("./linRegWithFriends.R")
 ## Main #################
 ##########################
 options(echo=FALSE)
+options( warn = 2 )
 args<-commandArgs(trailingOnly = TRUE)
 
 ##default data set when no args provided
@@ -39,7 +40,7 @@ if (length(args) == 2) {
 ## load data
 trainDataPosts <- read.csv(file = fileTrainDataPosts, header = TRUE)
 testDataPosts <-  read.csv(file = fileTestDataPosts, header = TRUE)
-trainDataFriends <- read.table(file = fileTrainDataFriends, col.names=c("Id", "FrdsId"))
+trainDataFriends <- read.table(file = fileTrainDataFriends, col.names=colInputFriends)
 
 colnames(trainDataPosts) <- colInputTrainHeaders
 colnames(testDataPosts) <- colInputTestHeaders
@@ -48,16 +49,17 @@ head(trainDataPosts)
 head(testDataPosts)
 
 plotModel(trainDataPosts, outDir)
-transformedTrainData <- transformFeatures(trainDataPosts, outDir)
-transformedTestData <- transformFeatures(testDataPosts, outDir)
+transformedTrainData <- transformTrainFeatures(trainDataPosts,trainDataFriends, outDir)
+transformedTestData <- transformTestFeatures(testDataPosts, trainDataFriends, transformedTrainData, outDir)
 plotTransformedModel(transformedTrainData, outDir)
 
 labeledTrainDataPosts <- labelContinents(transformedTrainData,  outDir)
 
 
-calcLinearRegression(transformedTrainData, transformedTestData, outDir)
-calcLinearRegressionOnEarliestHour(transformedTrainData, transformedTestData, outDir)
+#calcLinearRegression(transformedTrainData, transformedTestData, outDir)
+calcLinearRegressionOnEarliestAvgHour(transformedTrainData, transformedTestData, outDir)
+calcLinearRegressionOnFriendsList(transformedTrainData, transformedTestData, outDir)
 #calcCustomMutualInformation(trainDataPosts, testDataPosts, outDir)
 #labeledTestDataPosts<-calcSVM(labeledTrainDataPosts, transformedTestData, outDir)
-linearRegwithFriendsList(labeledTrainDataPosts,trainDataFriends,transformedTestData,outDir)
-
+#linearRegwithFriendsList(labeledTrainDataPosts,trainDataFriends,transformedTestData,outDir)
+warnings()
