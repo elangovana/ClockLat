@@ -27,6 +27,23 @@ createDir <- function(path){
   }
 }
 
+clocklat.mean <- function(x){
+  mean(x, na.rm = TRUE)
+}
+
+clocklat.min <- function(x){
+  min(x, na.rm = TRUE)
+}
+
+
+clocklat.max <- function(x){
+  max(x, na.rm = TRUE)
+}
+
+clocklat.sum <- function(x){
+  sum(x, na.rm = TRUE)
+}
+
 writePredicationAsCsv <- function(testData, predicted_lat, predicted_lon, outdir, filenamePrefix){
   createDir(outDir)
   

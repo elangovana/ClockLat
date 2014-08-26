@@ -2,16 +2,25 @@ source("./globals.R")
 source("./InstallPackage.R")
 
 
+
+CleanInvalidData<- function(data){
+
+  data[ which(data[, hour1] > 24 ), hour1 ] <- NA
+  data[ which(data[, hour2] > 24 ), hour2 ] <- NA
+  data[ which(data[, hour3] > 24 ), hour3 ] <- NA
+   return(data)
+}
+
 createFeatureMaxMin <- function(trainData){
-  trainData[, latestHr] <- apply(trainData[, c(hour1, hour2, hour3)], 1, max)
-  trainData[, earliestHr] <- apply(trainData[, c(hour1, hour2, hour3)], 1, min)
+  trainData[, latestHr] <- apply(trainData[, c(hour1, hour2, hour3)], 1, clocklat.max)
+  trainData[, earliestHr] <- apply(trainData[, c(hour1, hour2, hour3)], 1, clocklat.min)
   print(head(trainData))
   return(trainData) 
 }
 
 createFeatureAvgTotal <- function(trainData){
-  trainData[, avgHr] <- apply(trainData[, c(hour1, hour2, hour3)], 1, mean)
-  trainData[, totalHr] <- apply(trainData[, c(hour1, hour2, hour3)], 1, sum)
+  trainData[, avgHr] <- apply(trainData[, c(hour1, hour2, hour3)], 1, clocklat.mean)
+  trainData[, totalHr] <- apply(trainData[, c(hour1, hour2, hour3)], 1, clocklat.sum)
   print(head(trainData))
   return(trainData) 
 }
@@ -40,7 +49,7 @@ createFriendsWeightedAvgLocation <- function(dataPosts, dataFriends, dataFriends
       print(paste( (completedSoFar*100/totalRecords), "% completed or", completedSoFar , "records processed so far" , format(Sys.time(), "%a %b %d %X %Y")))
       
     }
-    nofriends <- FALSE
+   
     userId <- dataPosts[i,id]
     myEarliestHr <- dataPosts[i, earliestHr]
     myAvgHr <- dataPosts[i, avgHr]
@@ -54,8 +63,8 @@ createFriendsWeightedAvgLocation <- function(dataPosts, dataFriends, dataFriends
       dataMyFriendsLatLon <- dataFriendsPostsLoc[  , c(id, earliestHr, avgHr, lat, lon)] 
     }
 
-    resLon[i] <- mean(dataMyFriendsLatLon[, lon]) 
-    resLat[i] <- mean(dataMyFriendsLatLon[, lat]) 
+    resLon[i] <- clocklat.mean(dataMyFriendsLatLon[, lon]) 
+    resLat[i] <- clocklat.mean(dataMyFriendsLatLon[, lat]) 
     
     tempColMyFriendsEarliestHr  = dataMyFriendsLatLon[, earliestHr]
     tempColMyFriendsAvgHr  = dataMyFriendsLatLon[, avgHr]
@@ -64,7 +73,7 @@ createFriendsWeightedAvgLocation <- function(dataPosts, dataFriends, dataFriends
     #resLon[i] <- mean(dataMyFriendsLatLon[, lon]) 
     tmpColSumDistance <-  abs(myEarliestHr - tempColMyFriendsEarliestHr) + abs(myAvgHr - tempColMyFriendsAvgHr)
 
-    indexOfClosestFriend = which( tmpColSumDistance == min(tmpColSumDistance) )[1]
+    indexOfClosestFriend = which( tmpColSumDistance == clocklat.min(tmpColSumDistance) )[1]
     resCLon[i] <-dataMyFriendsLatLon[indexOfClosestFriend, lon ]
     resCLat[i] <- dataMyFriendsLatLon[indexOfClosestFriend, lat ]
   
@@ -81,7 +90,8 @@ createFriendsWeightedAvgLocation <- function(dataPosts, dataFriends, dataFriends
 }
 
 transformTrainFeatures <- function(dataPosts, dataFriends, outDir){
-  data <- createFeatureMaxMin(dataPosts)  
+  data <- CleanInvalidData(dataPosts)
+  data <- createFeatureMaxMin(data)  
   data <- createFeatureAvgTotal(data)
   data <- createFriendsWeightedAvgLocation(data, dataFriends)
   write.table(data,  file= file.path(outDir, "transformedData.csv"),  row.names = FALSE, sep=",", quote = FALSE)  
@@ -90,7 +100,8 @@ transformTrainFeatures <- function(dataPosts, dataFriends, outDir){
 
 
 transformTestFeatures <- function(dataPosts, dataFriends, dataFriendsLocPosts, outDir){
-  data <- createFeatureMaxMin(dataPosts)  
+  data <- CleanInvalidData(dataPosts)
+  data <- createFeatureMaxMin(data)  
   data <- createFeatureAvgTotal(data)
   
   data <- createFriendsWeightedAvgLocation(data, dataFriends, dataFriendsLocPosts)
