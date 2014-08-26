@@ -115,7 +115,7 @@ createFriendsWeightedAvgLocation <- function(dataPosts, dataFriends, dataFriends
     
   
     #resLon[i] <- mean(dataMyFriendsLatLon[, lon]) 
-    tmpColSumDistance <-  abs(myEarliestHr - tempColMyFriendsEarliestHr) + abs(myAvgHr - tempColMyFriendsAvgHr)
+    tmpColSumDistance <-  abs(myEarliestHr - tempColMyFriendsEarliestHr) 
 
     indexOfClosestFriend = which( tmpColSumDistance == clocklat.min(tmpColSumDistance) )[1]
     resCLon[i] <-dataMyFriendsLatLon[indexOfClosestFriend, lon ]
