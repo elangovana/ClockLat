@@ -70,7 +70,7 @@ calcLinearRegressionOnFriendsList <- function(postsData,  testData, outDir){
   lm_model <-lm(formula, data= postsData)
   print(summary(lm_model))
   predicted_lat <-predict(lm_model, newdata=testData)
-  
+  plotFittedModel(lm_model, "latFittedModelFriend.pdf", outDir)
   
   #longitude 
   factors <- paste(c(closestFriendsLon),collapse="+")
@@ -80,8 +80,9 @@ calcLinearRegressionOnFriendsList <- function(postsData,  testData, outDir){
   lm_model <-lm(formula, data= postsData)
   print(summary(lm_model))
   predicted_lon <-predict(lm_model, newdata=testData)
-  
+  plotFittedModel(lm_model, "lonFittedModelFriend.pdf", outDir)
   
   #write predicted values to file
   writePredicationAsCsv(testData, predicted_lat, predicted_lon, outdir, "LinearRegressionFriendsHr")
+  
 }

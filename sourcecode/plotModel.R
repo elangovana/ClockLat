@@ -158,3 +158,14 @@ plotTransformedModel <- function(dataset, outDir){
   
   dev.off()
 }
+
+plotFittedModel <- function(lmfit, fileName, outDir){
+  createDir(outDir)
+  
+  
+  
+
+  pdf(file.path(outDir,fileName), onefile = TRUE)
+  plot(lmfit)
+  dev.off()
+}
