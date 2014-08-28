@@ -68,7 +68,7 @@ calcLinearRegressionOnFriendsList <- function(postsData,  testData, outDir){
   #longitude 
   predicted_lon <- calcLinearRegressionLonOnFriendsList(postsData,  testData, outDir)
   #write predicted values to file
-  writePredicationAsCsv(testData, predicted_lat, predicted_lon, outdir, "LinearRegressionFriendsHr")
+  return(writePredicationAsCsv(testData, predicted_lat, predicted_lon, outdir, "LinearRegressionFriendsHr"))
   
 }
 

@@ -59,4 +59,6 @@ writePredicationAsCsv <- function(testData, predicted_lat, predicted_lon, outdir
   
   write.csv(data[, c(id, lat,lon)], file= file.path(outDir, paste( c(filenamePrefix,"submission",'.csv'), collapse="")), row.names = FALSE,  quote = FALSE) 
   write.table(data,  file= file.path(outDir, paste( c(filenamePrefix,'.csv'), collapse="")),  row.names = FALSE, sep=",", quote = FALSE)  
+  
+  return(data)
 }

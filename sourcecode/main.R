@@ -4,12 +4,20 @@ source("./linearRegressionModel.R")
 source("./SVMModel.R")
 source("./LinRegwithSVM.R")
 source("./TransformFeature.R")
+
+calcRMS <- function(actualData, predictedData){
+  n <- length(actualData)
+
+  return( sqrt( sum(( actualData - predictedData)^2) /n))
+}
+
+
 ##########################
 ## Main #################
 ##########################
 options(echo=FALSE)
 options( warn = 2 )
-shouldSample = TRUE
+trainRunOnly = TRUE
 args<-commandArgs(trailingOnly = TRUE)
 
 ##default data set when no args provided
@@ -40,24 +48,26 @@ trainDataPosts <- read.csv(file = fileTrainDataPosts, header = TRUE)
 testDataPosts <-  read.csv(file = fileTestDataPosts, header = TRUE)
 
 trainDataFriends <- read.table(file = fileTrainDataFriends, col.names=colInputFriends)
+actualTestDataLatLon <- NULL
 
-if (shouldSample){
+if (trainRunOnly){
   sampleTrainData <- function(trainDataPosts1){
-    trainDataPosts <- trainDataPosts1[sample(nrow(trainDataPosts1), 13000), ]
+    trainDataPosts <- trainDataPosts1[sample(nrow(trainDataPosts1), 45000), ]
     return(trainDataPosts)
   }
   
   sampleTestData <- function(trainDataPosts1, selectedTrainDataPosts){
     trainDataPostsNotInSample <- trainDataPosts1[which( !(trainDataPosts1[,id] %in% selectedTrainDataPosts[,id]) ),]
     dim(trainDataPostsNotInSample)
-    testDataPosts <- trainDataPostsNotInSample[sample(nrow(trainDataPostsNotInSample),100), colInputTestHeaders ]
+    testDataPosts <- trainDataPostsNotInSample[sample(nrow(trainDataPostsNotInSample),1000),  ]
     return(testDataPosts)
   }
   sampledtrainDataPosts =  sampleTrainData(trainDataPosts)
   sampledtestDataPosts = sampleTestData(trainDataPosts, sampledtrainDataPosts)
 
   trainDataPosts = sampledtrainDataPosts
-  testDataPosts = sampledtestDataPosts
+  testDataPosts = sampledtestDataPosts[, colInputTestHeaders]
+  actualTestDataLatLon = sampledtestDataPosts[, c(id, lat, lon)]
   print("---")
   print(dim(trainDataPosts))
   print(dim(testDataPosts))
@@ -77,8 +87,15 @@ plotTransformedModel(transformedTrainData, outDir)
 
 
 #calcLinearRegressionOnFriendsListWithZonalModel(transformedTrainData, transformedTestData, outDir)
-calcLinearRegressionOnFriendsList(transformedTrainData, transformedTestData, outDir)
+ predictedResults <- calcLinearRegressionOnFriendsList(transformedTrainData, transformedTestData, outDir)
 
 #labeledTestDataPosts<-calcSVM(transformedTrainData, transformedTestData, outDir)
+
+if (trainRunOnly) {
+  rmsLat <- calcRMS(actualTestDataLatLon[, lat], predictedResults[,lat])
+  rmsLon <- calcRMS(actualTestDataLatLon[, lon], predictedResults[,lon])
+  print(paste("RMA Lat, RMA Lon, Total Avg LMS = " , rmsLat, rmsLon, (rmsLat +rmsLon)/2))
+}
+
 
 
