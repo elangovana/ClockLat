@@ -51,7 +51,7 @@ calcLinearRegressionOnEarliestAvgHour<- function(postsData, testData, outDir){
   lm_model <-lm(formula, data= postsData)
   print(summary(lm_model))
   predicted_lon <-predict(lm_model, newdata=testData)
-  
+  warnings()
   
   #write predicted values to file
   writePredicationAsCsv(testData, predicted_lat, predicted_lon, outdir, "LinearRegressionEarliestHr")
@@ -63,7 +63,7 @@ calcLinearRegressionOnFriendsList <- function(postsData,  testData, outDir){
  
   
   ## latitude
-  factors <- paste(c(closestFriendsLat),collapse="+")
+  factors <- paste(c(majorityFriendsLat),collapse="+")
   formula <- as.formula(paste(paste(lat,"~"),factors))
   print("Formula for lat used: ")
   print(formula)
@@ -71,9 +71,10 @@ calcLinearRegressionOnFriendsList <- function(postsData,  testData, outDir){
   print(summary(lm_model))
   predicted_lat <-predict(lm_model, newdata=testData)
   plotFittedModel(lm_model, "latFittedModelFriend.pdf", outDir)
+  print(warnings())
   
   #longitude 
-  factors <- paste(c(closestFriendsLon),collapse="+")
+  factors <- paste(c(majorityFriendsLon),collapse="+")
   formula <- as.formula(paste(paste(lon,"~"),factors))
   print("Formula for longitude used: ")
   print(formula)
@@ -81,7 +82,7 @@ calcLinearRegressionOnFriendsList <- function(postsData,  testData, outDir){
   print(summary(lm_model))
   predicted_lon <-predict(lm_model, newdata=testData)
   plotFittedModel(lm_model, "lonFittedModelFriend.pdf", outDir)
-  
+  print(warnings())
   #write predicted values to file
   writePredicationAsCsv(testData, predicted_lat, predicted_lon, outdir, "LinearRegressionFriendsHr")
   

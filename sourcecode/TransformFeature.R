@@ -2,7 +2,7 @@ source("./globals.R")
 source("./InstallPackage.R")
 
 pkgInstall("rworldmap")
-
+pkgInstall("plyr")
 
 library(sp)
 library(rworldmap)
@@ -44,11 +44,11 @@ createContinents <- function(dataset){
 
 
 CleanInvalidData<- function(data){
-
+  
   data[ which(data[, hour1] > 24 ), hour1 ] <- NA
   data[ which(data[, hour2] > 24 ), hour2 ] <- NA
   data[ which(data[, hour3] > 24 ), hour3 ] <- NA
-   return(data)
+  return(data)
 }
 
 createFeatureMaxMin <- function(trainData){
@@ -65,72 +65,104 @@ createFeatureAvgTotal <- function(trainData){
   return(trainData) 
 }
 
+calcMajorityFriendsLoc <- function(dataMyFriendsLatLon){
+  tmpColFriendsLatLonFloored <- floor( dataMyFriendsLatLon[, c(lat, lon)])
+  colnames( tmpColFriendsLatLonFloored) <- c(lat,lon)
+  
+  tmpCountOfFriendsFlooredLatLon = count(tmpColFriendsLatLonFloored, c(lat, lon))
+  
+  majorityFriendsFlooredLatLon = tmpCountOfFriendsFlooredLatLon[ which(tmpCountOfFriendsFlooredLatLon$freq == max(tmpCountOfFriendsFlooredLatLon$freq)), ]  
+  majorityFriendsFlooredLatLon = majorityFriendsFlooredLatLon[1, ]
+  
+  majorityFriendsLatLon = dataMyFriendsLatLon[which(floor(dataMyFriendsLatLon[, lat]) %in% majorityFriendsFlooredLatLon[,lat] 
+                                                    & floor(dataMyFriendsLatLon[, lon]) %in% majorityFriendsFlooredLatLon[,lon]),]
+  
+  return( c(clocklat.mean(majorityFriendsLatLon[, lat]), clocklat.mean( majorityFriendsLatLon[, lon])))
+ 
 
+}
 
 createFriendsWeightedAvgLocation <- function(dataPosts, dataFriends, dataFriendsPostsLoc = NULL){
   
   if (is.null(dataFriendsPostsLoc )) {
     dataFriendsPostsLoc = dataPosts
   }
- 
+  
+  
+  
   #remove invalid coordinates
   dataFriendsPostsLoc <- dataFriendsPostsLoc[ which(!is.na(dataFriendsPostsLoc[,region])), ]
-
-
+  
+  
   completedSoFar = 0
   resLat <- numeric(nrow(dataPosts))
   resCLat <- numeric(nrow(dataPosts))
   resLon <- numeric(nrow(dataPosts))
   resCLon <- numeric(nrow(dataPosts))
-  
+  resMLon <- numeric(nrow(dataPosts))
+  resMLat <- numeric(nrow(dataPosts))
   coldataFriends_Id = dataFriends[, id]
   coldataFriendsPostsLoc_id = dataFriendsPostsLoc[, id]
   totalRecords = nrow(dataPosts)
   for( i in 1:nrow(dataPosts)){    
-
+    
     completedSoFar = completedSoFar + 1
     if (completedSoFar %% 1000 == 0){
       print(paste( (completedSoFar*100/totalRecords), "% completed or", completedSoFar , "records processed so far" , format(Sys.time(), "%a %b %d %X %Y")))
       
     }
-   
+    hasFriends = TRUE
     userId <- dataPosts[i,id]
     myEarliestHr <- dataPosts[i, earliestHr]
-    myAvgHr <- dataPosts[i, avgHr]
+    myLatestHr <- dataPosts[i, latestHr]
     
     dataMyFriends <- dataFriends[which(coldataFriends_Id == userId), friendsId]
     
-    dataMyFriendsLatLon <-  dataFriendsPostsLoc[ coldataFriendsPostsLoc_id %in% dataMyFriends , c(id, earliestHr, avgHr, lat, lon)]    
-  
+    dataMyFriendsLatLon <-  dataFriendsPostsLoc[ coldataFriendsPostsLoc_id %in% dataMyFriends , c(id, earliestHr, latestHr, lat, lon)]    
+    
     if (length(dataMyFriendsLatLon[,id]) == 0 ){
+      hasFriends = FALSE
       #when no friends lat lon available, use all available data     
-      dataMyFriendsLatLon <- dataFriendsPostsLoc[  , c(id, earliestHr, avgHr, lat, lon)] 
+      dataMyFriendsLatLon <- dataFriendsPostsLoc[  , c(id, earliestHr, latestHr, lat, lon)] 
     }
-
+    
     resLon[i] <- clocklat.mean(dataMyFriendsLatLon[, lon]) 
     resLat[i] <- clocklat.mean(dataMyFriendsLatLon[, lat]) 
     
     tempColMyFriendsEarliestHr  = dataMyFriendsLatLon[, earliestHr]
-    tempColMyFriendsAvgHr  = dataMyFriendsLatLon[, avgHr]
+    tempColMyFriendsLatestHr  = dataMyFriendsLatLon[, latestHr]
     
-  
+    
     #resLon[i] <- mean(dataMyFriendsLatLon[, lon]) 
-    tmpColSumDistance <-  abs(myEarliestHr - tempColMyFriendsEarliestHr) 
-
+    
+    
+    tmpColSumDistance <-  abs(myEarliestHr - tempColMyFriendsEarliestHr) + abs(myLatestHr - tempColMyFriendsLatestHr) 
+    
     indexOfClosestFriend = which( tmpColSumDistance == clocklat.min(tmpColSumDistance) )[1]
     resCLon[i] <-dataMyFriendsLatLon[indexOfClosestFriend, lon ]
     resCLat[i] <- dataMyFriendsLatLon[indexOfClosestFriend, lat ]
-  
-   
-   
-  
+    
+    #Calc majority of friends
+    if (hasFriends) {
+      result <- calcMajorityFriendsLoc(dataMyFriendsLatLon)
+ 
+      resMLat[i] = result[ 1]
+      resMLon[i] = result[2]     
+    }
+    else {
+     resMLon[i] = resCLon[i]
+     resMLat[i] = resCLat[i]
+    }
   }
   
   dataPosts[, avgFriendsLat] <- resLat
   dataPosts[, avgFriendsLon] <- resLon
   dataPosts[, closestFriendsLat] <- resCLat
   dataPosts[, closestFriendsLon] <- resCLon
+  dataPosts[, majorityFriendsLat] <- resMLat
+  dataPosts[, majorityFriendsLon] <- resMLon
   return(dataPosts)
+  
 }
 
 transformTrainFeatures <- function(dataPosts, dataFriends, outDir){
@@ -139,7 +171,7 @@ transformTrainFeatures <- function(dataPosts, dataFriends, outDir){
   data <- createFeatureAvgTotal(data)
   data <- createContinents(data)
   data <- createFriendsWeightedAvgLocation(data, dataFriends)
-
+  
   write.table(data,  file= file.path(outDir, "transformedData.csv"),  row.names = FALSE, sep=",", quote = FALSE)  
   return(data) 
 }

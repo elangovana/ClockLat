@@ -7,6 +7,7 @@ lat <- "Lat"
 lon <- "Lon"
 posts <- "Posts"
 region <- "Region"
+predictedRegion <- "PredictedRegion"
 earliestHr <- "EarliestHour"
 latestHr <- "LatestHour"
 avgHr <- "AverageHour"
@@ -16,6 +17,8 @@ avgFriendsLon <- "AvgFriendsLon"
 closestFriendsLat <- "closestFreindsLat"
 closestFriendsLon <- "closestFriendsLon"
 friendsId <- "friendsId"
+majorityFriendsLat <- "MajorityFreindsLat"
+majorityFriendsLon <- "majorityFriendsLon"
 
 colInputTrainHeaders <-  c(id, hour1,hour2, hour3, lat, lon, posts)
 colInputTestHeaders <-  c(id, hour1,hour2, hour3,  posts)
