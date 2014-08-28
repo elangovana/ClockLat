@@ -52,7 +52,7 @@ actualTestDataLatLon <- NULL
 
 if (trainRunOnly){
   sampleTrainData <- function(trainDataPosts1){
-    trainDataPosts <- trainDataPosts1[sample(nrow(trainDataPosts1), 45000), ]
+    trainDataPosts <- trainDataPosts1[sample(nrow(trainDataPosts1), 10000), ]
     return(trainDataPosts)
   }
   
