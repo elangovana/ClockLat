@@ -9,7 +9,7 @@ source("./TransformFeature.R")
 ##########################
 options(echo=FALSE)
 options( warn = 2 )
-shouldSample = FALSE
+shouldSample = TRUE
 args<-commandArgs(trailingOnly = TRUE)
 
 ##default data set when no args provided
@@ -43,7 +43,7 @@ trainDataFriends <- read.table(file = fileTrainDataFriends, col.names=colInputFr
 
 if (shouldSample){
   sampleTrainData <- function(trainDataPosts1){
-    trainDataPosts <- trainDataPosts1[sample(nrow(trainDataPosts1), 10000), ]
+    trainDataPosts <- trainDataPosts1[sample(nrow(trainDataPosts1), 13000), ]
     return(trainDataPosts)
   }
   
@@ -76,6 +76,7 @@ transformedTestData <- transformTestFeatures(testDataPosts, trainDataFriends, tr
 plotTransformedModel(transformedTrainData, outDir)
 
 
+#calcLinearRegressionOnFriendsListWithZonalModel(transformedTrainData, transformedTestData, outDir)
 calcLinearRegressionOnFriendsList(transformedTrainData, transformedTestData, outDir)
 
 #labeledTestDataPosts<-calcSVM(transformedTrainData, transformedTestData, outDir)
