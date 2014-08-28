@@ -78,8 +78,8 @@ calcMajorityFriendsLoc <- function(dataMyFriendsLatLon){
                                                     & floor(dataMyFriendsLatLon[, lon]) %in% majorityFriendsFlooredLatLon[,lon]),]
   
   return( c(clocklat.mean(majorityFriendsLatLon[, lat]), clocklat.mean( majorityFriendsLatLon[, lon])))
- 
-
+  
+  
 }
 
 createFriendsWeightedAvgLocation <- function(dataPosts, dataFriends, dataFriendsPostsLoc = NULL){
@@ -112,6 +112,8 @@ createFriendsWeightedAvgLocation <- function(dataPosts, dataFriends, dataFriends
       
     }
     hasFriends = TRUE
+    myLat = dataPosts[i,lat]
+    myLon = dataPosts[i, lon]
     userId <- dataPosts[i,id]
     myEarliestHr <- dataPosts[i, earliestHr]
     myLatestHr <- dataPosts[i, latestHr]
@@ -120,11 +122,21 @@ createFriendsWeightedAvgLocation <- function(dataPosts, dataFriends, dataFriends
     
     dataMyFriendsLatLon <-  dataFriendsPostsLoc[ coldataFriendsPostsLoc_id %in% dataMyFriends , c(id, earliestHr, latestHr, lat, lon)]    
     
-    if (length(dataMyFriendsLatLon[,id]) == 0 ){
+    if (length(dataMyFriendsLatLon[,id]) == 0  ){
       hasFriends = FALSE
       #when no friends lat lon available, use all available data     
       dataMyFriendsLatLon <- dataFriendsPostsLoc[  , c(id, earliestHr, latestHr, lat, lon)] 
+    }else if (!is.null(myLat)) {
+      
+      if (length(dataMyFriendsLatLon[,id]) ==1 & (abs (dataMyFriendsLatLon[,lat]-myLat) > 40||abs (dataMyFriendsLatLon[,lon]-myLon) > 70)){
+        ## filter bad data , exactly one friend and big diff in locations    
+        hasFriends = FALSE        
+        dataMyFriendsLatLon <- dataFriendsPostsLoc[  , c(id, earliestHr, latestHr, lat, lon)] 
+      }
+      
     }
+    
+    
     
     resLon[i] <- clocklat.mean(dataMyFriendsLatLon[, lon]) 
     resLat[i] <- clocklat.mean(dataMyFriendsLatLon[, lat]) 
@@ -145,13 +157,13 @@ createFriendsWeightedAvgLocation <- function(dataPosts, dataFriends, dataFriends
     #Calc majority of friends
     if (hasFriends) {
       result <- calcMajorityFriendsLoc(dataMyFriendsLatLon)
- 
+      
       resMLat[i] = result[ 1]
       resMLon[i] = result[2]     
     }
     else {
-     resMLon[i] = resCLon[i]
-     resMLat[i] = resCLat[i]
+      resMLon[i] = resCLon[i]
+      resMLat[i] = resCLat[i]
     }
   }
   
