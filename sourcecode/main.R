@@ -1,32 +1,20 @@
 source("./globals.R")
+source("./utilities.r")
 source("./plotModel.R")
 source("./linearRegressionModel.R")
 source("./SVMModel.R")
 source("./LinRegwithSVM.R")
 source("./TransformFeature.R")
+source("./BaggingWithLinearRegressionModel.r")
 
-calcRMS <- function(actualData, predictedData){
-  return (sqrt(mean((actualData-predictedData)^2)))
-}
 
-sampleTrainData <- function(trainDataPosts1, count){
-  trainDataPosts <- trainDataPosts1[sample(nrow(trainDataPosts1), count), ]
-  return(trainDataPosts)
-}
-
-sampleTestData <- function(trainDataPosts1, selectedTrainDataPosts, count){
-  trainDataPostsNotInSample <- trainDataPosts1[which( !(trainDataPosts1[,id] %in% selectedTrainDataPosts[,id]) ),]
-  dim(trainDataPostsNotInSample)
-  testDataPosts <- trainDataPostsNotInSample[sample(nrow(trainDataPostsNotInSample),count),  ]
-  return(testDataPosts)
-}
 
 ##########################
 ## Main #################
 ##########################
 options(echo=FALSE)
-options( warn = 2 )
-trainRunOnly = TRUE
+#options( warn = 2 )
+trainRunOnly = FALSE
 args<-commandArgs(trailingOnly = TRUE)
 
 ##default data set when no args provided
@@ -36,19 +24,16 @@ fileTestDataPosts = "./../data/posts-test-x.txt"
 outDir = "./../output"
 
 ## parse args for data set
-if (length(args) == 2) {
+if (length(args) == 4) {
   print(args)
   fileTrainDataPosts <- args[0]
   fileTrainDataFriends <- args[1]
+  fileTestDataPosts <- args[2]
+  outDir <- args[3]
   ##TODO: include others
 } else {
-  cat("Using Default dataset", fileTrainDataPosts)
-  print("Usage: 
-        main.r TestPostsFile trainPostsFile TrainFriendsFile outputDir \n
-        where 
-            TestPostsFile is the test dataset.
-            Tests
-        ")
+  print("Usage:  main.r  trainPostsFile TrainFriendsFile TestPostsFile outputDir \n")
+  cat("Using Default dataset without parameters ", fileTrainDataPosts, fileTrainDataFriends, fileTestDataPosts, outDir)
 }
  
 
@@ -61,44 +46,36 @@ actualTestDataLatLon <- NULL
 
 if (trainRunOnly){
   
-  sampledtrainDataPosts =  sampleTrainData(trainDataPosts, 48000)
+  sampledtrainDataPosts =  sampleTrainData(trainDataPosts, 10000)
   sampledtestDataPosts = sampleTestData(trainDataPosts, sampledtrainDataPosts, 100)
 
   trainDataPosts = sampledtrainDataPosts
   testDataPosts = sampledtestDataPosts[, colInputTestHeaders]
   actualTestDataLatLon = sampledtestDataPosts[, c(id, lat, lon)]
-  print("---")
-  print(dim(trainDataPosts))
-  print(dim(testDataPosts))
+
 }
 
 
 colnames(trainDataPosts) <- colInputTrainHeaders
 colnames(testDataPosts) <- colInputTestHeaders
-
-head(trainDataPosts)
-head(testDataPosts)
-
+#plot Input data
 plotModel(trainDataPosts, outDir)
+
+#transform features
 transformedTrainData <- transformTrainFeatures(trainDataPosts,trainDataFriends, outDir)
 transformedTestData <- transformTestFeatures(testDataPosts, trainDataFriends, transformedTrainData, outDir)
 plotTransformedModel(transformedTrainData, outDir)
 
+#predictions
+predictedResultsRegression <- calcLinearRegressionOnFriendsList(transformedTrainData, transformedTestData, outDir)
+predictedResultsBagging <- calcBaggedRegression(transformedTrainData, transformedTestData, outDir)
 
-#calcLinearRegressionOnFriendsListWithZonalModel(transformedTrainData, transformedTestData, outDir)
- predictedResults <- calcLinearRegressionOnFriendsList(transformedTrainData, transformedTestData, outDir)
-
-#labeledTestDataPosts<-calcSVM(transformedTrainData, transformedTestData, outDir)
 
 if (trainRunOnly) {
-  rmsLat <- calcRMS(actualTestDataLatLon[, lat], predictedResults[,lat])
-  rmsLon <- calcRMS(actualTestDataLatLon[, lon], predictedResults[,lon])
-  print(paste("RMA Lat, RMA Lon, Total Avg LMS = " , rmsLat, rmsLon, (rmsLat +rmsLon)/2))
-  
-  sampleHalf = sample(nrow(actualTestDataLatLon), length(actualTestDataLatLon[,id])/2)
-  rmsLatHalfSampled <-  calcRMS(actualTestDataLatLon[sampleHalf, lat], predictedResults[sampleHalf,lat])
-  rmsLonHalfSampled <-  calcRMS(actualTestDataLatLon[sampleHalf, lon], predictedResults[sampleHalf,lon])
-  print(paste("Sampled 50% RMA Lat, RMA Lon, Total Avg LMS = " , rmsLatHalfSampled, rmsLonHalfSampled, (rmsLatHalfSampled +rmsLonHalfSampled)/2))
+  #compare results
+
+  compareAcutalVsPredicted(actualTestDataLatLon, predictedResultsRegression)
+  compareAcutalVsPredicted(actualTestDataLatLon, predictedResultsBagging)
 }
 
 

@@ -59,6 +59,9 @@ calcLinearRegressionOnEarliestAvgHour<- function(postsData, testData, outDir){
 
 calcLinearRegressionOnFriendsList <- function(postsData,  testData, outDir){
   createDir(outDir)
+  ## better to have NA values than opposite signed values
+  postsData[ postsData[, friendsCount] == 0, c(majorityFriendsLat, majorityFriendsLon)] <- NA
+  testData[testData[, friendsCount] == 0, c(majorityFriendsLat, majorityFriendsLon)] <- NA
   
  
   
@@ -86,7 +89,7 @@ calcLinearRegressionLatOnFriendsList<- function(postsData,  testData, outDir, fi
 }
 
 calcLinearRegressionLonOnFriendsList<- function(postsData,  testData, outDir, filename="lonFittedModelFriend.pdf"){
-  factors <- paste(c(majorityFriendsLon),collapse="+")
+  factors <- paste(c(majorityFriendsLon, earliestHr),collapse="+")
   formula <- as.formula(paste(paste(lon,"~"),factors))
   print("Formula for longitude used: ")
   print(formula)

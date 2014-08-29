@@ -33,8 +33,7 @@ coords2continent = function(points)
 
 createContinents <- function(dataset){
   indices <-  coords2continent(dataset[, c(lon, lat)])
-  
-  print(head(indices$REGION))
+
   data<- cbind(dataset, indices$REGION)
   names(data)[names(data) == 'indices$REGION'] <- region
   
@@ -54,14 +53,14 @@ CleanInvalidData<- function(data){
 createFeatureMaxMin <- function(trainData){
   trainData[, latestHr] <- apply(trainData[, c(hour1, hour2, hour3)], 1, clocklat.max)
   trainData[, earliestHr] <- apply(trainData[, c(hour1, hour2, hour3)], 1, clocklat.min)
-  print(head(trainData))
+
   return(trainData) 
 }
 
 createFeatureAvgTotal <- function(trainData){
   trainData[, avgHr] <- apply(trainData[, c(hour1, hour2, hour3)], 1, clocklat.mean)
   trainData[, totalHr] <- apply(trainData[, c(hour1, hour2, hour3)], 1, clocklat.sum)
-  print(head(trainData))
+
   return(trainData) 
 }
 
@@ -102,7 +101,7 @@ createFriendsWeightedAvgLocation <- function(dataPosts, dataFriends, dataFriends
   resMLon <- numeric(nrow(dataPosts))
   resMLat <- numeric(nrow(dataPosts))
   resFriendsCount <- numeric(nrow(dataPosts))
-
+  resfriendsDataBad <- numeric(nrow(dataPosts))
   coldataFriends_Id = dataFriends[, id]
   coldataFriendsPostsLoc_id = dataFriendsPostsLoc[, id]
   totalRecords = nrow(dataPosts)
@@ -124,7 +123,8 @@ createFriendsWeightedAvgLocation <- function(dataPosts, dataFriends, dataFriends
     
     dataMyFriendsLatLon <-  dataFriendsPostsLoc[ coldataFriendsPostsLoc_id %in% dataMyFriends , c(id, earliestHr, latestHr, lat, lon)]    
     resFriendsCount[i] <- length(dataMyFriendsLatLon[,id])
-      
+    resfriendsDataBad[i] <- FALSE
+    
     if (resFriendsCount[i] == 0  ){
       hasFriends = FALSE
       #when no friends lat lon available, use all available data     
@@ -132,11 +132,12 @@ createFriendsWeightedAvgLocation <- function(dataPosts, dataFriends, dataFriends
     }
     else if (!is.null(myLat)) {
       
-      if (resFriendsCount[i] ==1 & (abs (dataMyFriendsLatLon[,lat]-myLat) > 40||abs (dataMyFriendsLatLon[,lon]-myLon) > 70)){
-        ## filter bad data , exactly one friend and big diff in locations    
-        hasFriends = FALSE        
-        dataMyFriendsLatLon <- dataFriendsPostsLoc[  , c(id, earliestHr, latestHr, lat, lon)] 
-      }
+       if (resFriendsCount[i] ==1 & (abs (dataMyFriendsLatLon[,lat]-myLat) > 50||abs (dataMyFriendsLatLon[,lon]-myLon) > 100)){
+#         ## filter bad data , exactly one friend and big diff in locations    
+         hasFriends = FALSE        
+         dataMyFriendsLatLon <- dataFriendsPostsLoc[  , c(id, earliestHr, latestHr, lat, lon)] 
+         resfriendsDataBad[i] = TRUE
+       }
       
     }
     
@@ -162,7 +163,7 @@ createFriendsWeightedAvgLocation <- function(dataPosts, dataFriends, dataFriends
     if (hasFriends) {
       result <- calcMajorityFriendsLoc(dataMyFriendsLatLon)
       
-      resMLat[i] = result[ 1]
+      resMLat[i] = result[1]
       resMLon[i] = result[2]     
     }
     else {
@@ -178,7 +179,7 @@ createFriendsWeightedAvgLocation <- function(dataPosts, dataFriends, dataFriends
   dataPosts[, majorityFriendsLat] <- resMLat
   dataPosts[, majorityFriendsLon] <- resMLon
   dataPosts[, friendsCount] <- resFriendsCount
- 
+  dataPosts[, friendsDataBad] <- resfriendsDataBad
   return(dataPosts)
   
 }
