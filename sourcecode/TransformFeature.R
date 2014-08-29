@@ -101,6 +101,8 @@ createFriendsWeightedAvgLocation <- function(dataPosts, dataFriends, dataFriends
   resCLon <- numeric(nrow(dataPosts))
   resMLon <- numeric(nrow(dataPosts))
   resMLat <- numeric(nrow(dataPosts))
+  resFriendsCount <- numeric(nrow(dataPosts))
+
   coldataFriends_Id = dataFriends[, id]
   coldataFriendsPostsLoc_id = dataFriendsPostsLoc[, id]
   totalRecords = nrow(dataPosts)
@@ -121,14 +123,16 @@ createFriendsWeightedAvgLocation <- function(dataPosts, dataFriends, dataFriends
     dataMyFriends <- dataFriends[which(coldataFriends_Id == userId), friendsId]
     
     dataMyFriendsLatLon <-  dataFriendsPostsLoc[ coldataFriendsPostsLoc_id %in% dataMyFriends , c(id, earliestHr, latestHr, lat, lon)]    
-    
-    if (length(dataMyFriendsLatLon[,id]) == 0  ){
+    resFriendsCount[i] <- length(dataMyFriendsLatLon[,id])
+      
+    if (resFriendsCount[i] == 0  ){
       hasFriends = FALSE
       #when no friends lat lon available, use all available data     
       dataMyFriendsLatLon <- dataFriendsPostsLoc[  , c(id, earliestHr, latestHr, lat, lon)] 
-    }else if (!is.null(myLat)) {
+    }
+    else if (!is.null(myLat)) {
       
-      if (length(dataMyFriendsLatLon[,id]) ==1 & (abs (dataMyFriendsLatLon[,lat]-myLat) > 40||abs (dataMyFriendsLatLon[,lon]-myLon) > 70)){
+      if (resFriendsCount[i] ==1 & (abs (dataMyFriendsLatLon[,lat]-myLat) > 40||abs (dataMyFriendsLatLon[,lon]-myLon) > 70)){
         ## filter bad data , exactly one friend and big diff in locations    
         hasFriends = FALSE        
         dataMyFriendsLatLon <- dataFriendsPostsLoc[  , c(id, earliestHr, latestHr, lat, lon)] 
@@ -173,6 +177,8 @@ createFriendsWeightedAvgLocation <- function(dataPosts, dataFriends, dataFriends
   dataPosts[, closestFriendsLon] <- resCLon
   dataPosts[, majorityFriendsLat] <- resMLat
   dataPosts[, majorityFriendsLon] <- resMLon
+  dataPosts[, friendsCount] <- resFriendsCount
+ 
   return(dataPosts)
   
 }

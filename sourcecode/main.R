@@ -6,11 +6,20 @@ source("./LinRegwithSVM.R")
 source("./TransformFeature.R")
 
 calcRMS <- function(actualData, predictedData){
-  n <- length(actualData)
-
-  return( sqrt( sum(( actualData - predictedData)^2) /n))
+  return (sqrt(mean((actualData-predictedData)^2)))
 }
 
+sampleTrainData <- function(trainDataPosts1, count){
+  trainDataPosts <- trainDataPosts1[sample(nrow(trainDataPosts1), count), ]
+  return(trainDataPosts)
+}
+
+sampleTestData <- function(trainDataPosts1, selectedTrainDataPosts, count){
+  trainDataPostsNotInSample <- trainDataPosts1[which( !(trainDataPosts1[,id] %in% selectedTrainDataPosts[,id]) ),]
+  dim(trainDataPostsNotInSample)
+  testDataPosts <- trainDataPostsNotInSample[sample(nrow(trainDataPostsNotInSample),count),  ]
+  return(testDataPosts)
+}
 
 ##########################
 ## Main #################
@@ -51,19 +60,9 @@ trainDataFriends <- read.table(file = fileTrainDataFriends, col.names=colInputFr
 actualTestDataLatLon <- NULL
 
 if (trainRunOnly){
-  sampleTrainData <- function(trainDataPosts1){
-    trainDataPosts <- trainDataPosts1[sample(nrow(trainDataPosts1), 10000), ]
-    return(trainDataPosts)
-  }
   
-  sampleTestData <- function(trainDataPosts1, selectedTrainDataPosts){
-    trainDataPostsNotInSample <- trainDataPosts1[which( !(trainDataPosts1[,id] %in% selectedTrainDataPosts[,id]) ),]
-    dim(trainDataPostsNotInSample)
-    testDataPosts <- trainDataPostsNotInSample[sample(nrow(trainDataPostsNotInSample),1000),  ]
-    return(testDataPosts)
-  }
-  sampledtrainDataPosts =  sampleTrainData(trainDataPosts)
-  sampledtestDataPosts = sampleTestData(trainDataPosts, sampledtrainDataPosts)
+  sampledtrainDataPosts =  sampleTrainData(trainDataPosts, 48000)
+  sampledtestDataPosts = sampleTestData(trainDataPosts, sampledtrainDataPosts, 100)
 
   trainDataPosts = sampledtrainDataPosts
   testDataPosts = sampledtestDataPosts[, colInputTestHeaders]
@@ -95,6 +94,11 @@ if (trainRunOnly) {
   rmsLat <- calcRMS(actualTestDataLatLon[, lat], predictedResults[,lat])
   rmsLon <- calcRMS(actualTestDataLatLon[, lon], predictedResults[,lon])
   print(paste("RMA Lat, RMA Lon, Total Avg LMS = " , rmsLat, rmsLon, (rmsLat +rmsLon)/2))
+  
+  sampleHalf = sample(nrow(actualTestDataLatLon), length(actualTestDataLatLon[,id])/2)
+  rmsLatHalfSampled <-  calcRMS(actualTestDataLatLon[sampleHalf, lat], predictedResults[sampleHalf,lat])
+  rmsLonHalfSampled <-  calcRMS(actualTestDataLatLon[sampleHalf, lon], predictedResults[sampleHalf,lon])
+  print(paste("Sampled 50% RMA Lat, RMA Lon, Total Avg LMS = " , rmsLatHalfSampled, rmsLonHalfSampled, (rmsLatHalfSampled +rmsLonHalfSampled)/2))
 }
 
 

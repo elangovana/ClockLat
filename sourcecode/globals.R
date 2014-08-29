@@ -19,6 +19,8 @@ closestFriendsLon <- "closestFriendsLon"
 friendsId <- "friendsId"
 majorityFriendsLat <- "MajorityFreindsLat"
 majorityFriendsLon <- "majorityFriendsLon"
+friendsCount <- "friendsCount"
+friendsDataBad <- "FriendsDataBad" 
 
 colInputTrainHeaders <-  c(id, hour1,hour2, hour3, lat, lon, posts)
 colInputTestHeaders <-  c(id, hour1,hour2, hour3,  posts)
