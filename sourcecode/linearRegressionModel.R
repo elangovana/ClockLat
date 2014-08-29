@@ -59,12 +59,7 @@ calcLinearRegressionOnEarliestAvgHour<- function(postsData, testData, outDir){
 
 calcLinearRegressionOnFriendsList <- function(postsData,  testData, outDir){
   createDir(outDir)
-  ## better to have NA values than opposite signed values
-  postsData[ postsData[, friendsCount] == 0, c(majorityFriendsLat, majorityFriendsLon)] <- NA
-  testData[testData[, friendsCount] == 0, c(majorityFriendsLat, majorityFriendsLon)] <- NA
-  
  
-  
   ## latitude
   predicted_lat <- calcLinearRegressionLatOnFriendsList(postsData,  testData, outDir)
   
