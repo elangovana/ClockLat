@@ -14,7 +14,11 @@ source("./BaggingWithLinearRegressionModel.r")
 ##########################
 options(echo=FALSE)
 #options( warn = 2 )
-trainRunOnly = FALSE
+trainRunOnly = TRUE
+##Options for train run only
+TRAINSIZE = 10000
+TESTSIZE = 10
+##
 args<-commandArgs(trailingOnly = TRUE)
 
 ##default data set when no args provided
@@ -46,8 +50,8 @@ actualTestDataLatLon <- NULL
 
 if (trainRunOnly){
   
-  sampledtrainDataPosts =  sampleTrainData(trainDataPosts, 10000)
-  sampledtestDataPosts = sampleTestData(trainDataPosts, sampledtrainDataPosts, 100)
+  sampledtestDataPosts =  selectTestData(trainDataPosts, TESTSIZE)
+  sampledtrainDataPosts = sampleTrainData(trainDataPosts, sampledtestDataPosts, TRAINSIZE)
 
   trainDataPosts = sampledtrainDataPosts
   testDataPosts = sampledtestDataPosts[, colInputTestHeaders]

@@ -18,12 +18,12 @@ compareAcutalVsPredicted <- function(actualTestDataLatLon, predictedResults){
 
 }
 
-sampleTrainData <- function(trainDataPosts1, count){
-  trainDataPosts <- trainDataPosts1[sample(nrow(trainDataPosts1), count), ]
+selectTestData <- function(trainDataPosts1, count){
+  trainDataPosts <- trainDataPosts1[c(1:count), ]
   return(trainDataPosts)
 }
 
-sampleTestData <- function(trainDataPosts1, selectedTrainDataPosts, count){
+sampleTrainData <- function(trainDataPosts1, selectedTrainDataPosts, count){
   trainDataPostsNotInSample <- trainDataPosts1[which( !(trainDataPosts1[,id] %in% selectedTrainDataPosts[,id]) ),]
   dim(trainDataPostsNotInSample)
   testDataPosts <- trainDataPostsNotInSample[sample(nrow(trainDataPostsNotInSample),count),  ]
