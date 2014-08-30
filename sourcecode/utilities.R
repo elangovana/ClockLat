@@ -10,12 +10,8 @@ compareAcutalVsPredicted <- function(actualTestDataLatLon, predictedResults){
   rmsLat <- calcRMS(actualTestDataLatLon[, lat], predictedResults[,lat])
   rmsLon <- calcRMS(actualTestDataLatLon[, lon], predictedResults[,lon])
   print(paste("RMA Lat, RMA Lon, Total Avg LMS = " , rmsLat, rmsLon, (rmsLat +rmsLon)/2))
-  
-  sampleHalf = sample(nrow(actualTestDataLatLon), length(actualTestDataLatLon[,id])/2)
-  rmsLatHalfSampled <-  calcRMS(actualTestDataLatLon[sampleHalf, lat], predictedResults[sampleHalf,lat])
-  rmsLonHalfSampled <-  calcRMS(actualTestDataLatLon[sampleHalf, lon], predictedResults[sampleHalf,lon])
-  print(paste("Sampled 50% RMA Lat, RMA Lon, Total Avg LMS = " , rmsLatHalfSampled, rmsLonHalfSampled, (rmsLatHalfSampled +rmsLonHalfSampled)/2))
-
+  rmsAvg <- (rmsLat + rmsLon)/2
+  return(list(rmsLat, rmsLon, rmsAvg))
 }
 
 selectTestData <- function(trainDataPosts1, count){

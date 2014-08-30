@@ -14,10 +14,14 @@ source("./BaggingWithLinearRegressionModel.r")
 ##########################
 options(echo=FALSE)
 #options( warn = 2 )
-trainRunOnly = TRUE
+trainRunOnly = FALSE
 ##Options for train run only
-TRAINSIZE = 10000
-TESTSIZE = 10
+TRAINSIZE = 45000
+TESTSIZE = 1000
+RUNS = 20
+##
+#ModelFunctions
+calcFunctions <- list("LinearRegressionOnFriendsList"=calcLinearRegressionOnFriendsList, "BaggedRegression"=calcBaggedRegression)
 ##
 args<-commandArgs(trailingOnly = TRUE)
 
@@ -39,48 +43,71 @@ if (length(args) == 4) {
   print("Usage:  main.r  trainPostsFile TrainFriendsFile TestPostsFile outputDir \n")
   cat("Using Default dataset without parameters ", fileTrainDataPosts, fileTrainDataFriends, fileTestDataPosts, outDir)
 }
- 
+
 
 ## load data
-trainDataPosts <- read.csv(file = fileTrainDataPosts, header = TRUE)
-testDataPosts <-  read.csv(file = fileTestDataPosts, header = TRUE)
+fullTrainDataPosts <- read.csv(file = fileTrainDataPosts, header = TRUE)
+fullTestDataPosts <-  read.csv(file = fileTestDataPosts, header = TRUE)
+fullTrainDataFriends <- read.table(file = fileTrainDataFriends, col.names=colInputFriends)
 
-trainDataFriends <- read.table(file = fileTrainDataFriends, col.names=colInputFriends)
+
+
 actualTestDataLatLon <- NULL
+if (!trainRunOnly){
+  RUNS = 1
+}
+resError = data.frame()
 
-if (trainRunOnly){
+for(i in 1:RUNS){
   
-  sampledtestDataPosts =  selectTestData(trainDataPosts, TESTSIZE)
-  sampledtrainDataPosts = sampleTrainData(trainDataPosts, sampledtestDataPosts, TRAINSIZE)
-
-  trainDataPosts = sampledtrainDataPosts
-  testDataPosts = sampledtestDataPosts[, colInputTestHeaders]
-  actualTestDataLatLon = sampledtestDataPosts[, c(id, lat, lon)]
-
+  trainDataPosts <- fullTrainDataPosts
+  testDataPosts <- fullTestDataPosts
+  trainDataFriends <- fullTrainDataFriends
+  
+  if (trainRunOnly){
+    
+    sampledtestDataPosts =  selectTestData(fullTrainDataPosts, TESTSIZE)
+    sampledtrainDataPosts = sampleTrainData(fullTrainDataPosts, sampledtestDataPosts, TRAINSIZE)
+    
+    trainDataPosts = sampledtrainDataPosts
+    testDataPosts = sampledtestDataPosts[, colInputTestHeaders]
+    actualTestDataLatLon = sampledtestDataPosts[, c(id, lat, lon)]
+    
+  }
+  
+  
+  colnames(trainDataPosts) <- colInputTrainHeaders
+  colnames(testDataPosts) <- colInputTestHeaders
+  #plot Input data
+  plotModel(trainDataPosts, outDir)
+  
+  #transform features
+  transformedTrainData <- transformTrainFeatures(trainDataPosts,trainDataFriends, outDir)
+  transformedTestData <- transformTestFeatures(testDataPosts, trainDataFriends, transformedTrainData, outDir)
+  plotTransformedModel(transformedTrainData, outDir)
+  
+  #predictions
+  for(f in 1:length(calcFunctions)){
+    print("In here")
+    calcFunction = calcFunctions[[f]]
+    nameOfFunct <- names(calcFunctions)[[f]]
+    predictedResults <- calcFunction(transformedTrainData, transformedTestData, outDir)
+    if (trainRunOnly) {
+      #compare results    
+      print("In result")
+      rmsResults <- compareAcutalVsPredicted(actualTestDataLatLon, predictedResults)
+      resError[i, paste(nameOfFunct,"Errlat")] <- rmsResults[1]
+      resError[i, paste(nameOfFunct,"ErrLon")] <- rmsResults[2]
+      resError[i, paste(nameOfFunct,"ErrAvg")] <- rmsResults[3]
+    }
+  }
+  
 }
-
-
-colnames(trainDataPosts) <- colInputTrainHeaders
-colnames(testDataPosts) <- colInputTestHeaders
-#plot Input data
-plotModel(trainDataPosts, outDir)
-
-#transform features
-transformedTrainData <- transformTrainFeatures(trainDataPosts,trainDataFriends, outDir)
-transformedTestData <- transformTestFeatures(testDataPosts, trainDataFriends, transformedTrainData, outDir)
-plotTransformedModel(transformedTrainData, outDir)
-
-#predictions
-predictedResultsRegression <- calcLinearRegressionOnFriendsList(transformedTrainData, transformedTestData, outDir)
-predictedResultsBagging <- calcBaggedRegression(transformedTrainData, transformedTestData, outDir)
-
-
 if (trainRunOnly) {
-  #compare results
-
-  compareAcutalVsPredicted(actualTestDataLatLon, predictedResultsRegression)
-  compareAcutalVsPredicted(actualTestDataLatLon, predictedResultsBagging)
+  write.csv(resError, file= file.path(outDir, paste( c("rmsError.csv"), collapse="")),  quote = FALSE)
 }
+
+
 
 
 

@@ -8,3 +8,8 @@
 packrat/lib*/
 .DS_Store
 output
+report/reportlatex/Report.aux
+report/reportlatex/Report.log
+report/reportlatex/Report.pdf
+report/reportlatex/Report.synctex.gz
+report/reportlatex/Report.toc
