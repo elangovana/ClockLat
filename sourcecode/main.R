@@ -16,9 +16,9 @@ options(echo=FALSE)
 #options( warn = 2 )
 trainRunOnly = FALSE
 ##Options for train run only
-TRAINSIZE = 45000
-TESTSIZE = 1000
-RUNS = 20
+TRAINSIZE = 100
+TESTSIZE = 1
+RUNS = 1
 ##
 #ModelFunctions
 calcFunctions <- list("LinearRegressionOnFriendsList"=calcLinearRegressionOnFriendsList, "BaggedRegression"=calcBaggedRegression)

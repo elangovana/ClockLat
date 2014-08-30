@@ -3,7 +3,9 @@ source("./InstallPackage.R")
 
 pkgInstall("rworldmap")
 pkgInstall("plyr")
+pkgInstall("igraph")
 
+library(igraph)
 library(sp)
 library(rworldmap)
 
@@ -33,7 +35,7 @@ coords2continent = function(points)
 
 createContinents <- function(dataset){
   indices <-  coords2continent(dataset[, c(lon, lat)])
-
+  
   data<- cbind(dataset, indices$REGION)
   names(data)[names(data) == 'indices$REGION'] <- region
   
@@ -53,16 +55,95 @@ CleanInvalidData<- function(data){
 createFeatureMaxMin <- function(trainData){
   trainData[, latestHr] <- apply(trainData[, c(hour1, hour2, hour3)], 1, clocklat.max)
   trainData[, earliestHr] <- apply(trainData[, c(hour1, hour2, hour3)], 1, clocklat.min)
-
+  
   return(trainData) 
 }
+
+
 
 createFeatureAvgTotal <- function(trainData){
   trainData[, avgHr] <- apply(trainData[, c(hour1, hour2, hour3)], 1, clocklat.mean)
   trainData[, totalHr] <- apply(trainData[, c(hour1, hour2, hour3)], 1, clocklat.sum)
-
+  
   return(trainData) 
 }
+
+getMyImmediateFriendsLatLon <- function(userId, friendsGraph, friendsLatLon, alreadySearchedEdgeIndex){
+  
+  colfriendsGraph_Id = friendsGraph[, id]
+  colfriendsGraph_friendId = friendsGraph[, friendsId]
+  colFriendsPostsLoc_id = friendsLatLon[, id]
+  
+  dataMyFriends <- friendsGraph[which(colfriendsGraph_Id == userId ), friendsId]
+  
+  #print(dataMyFriends)
+  dataMyFriendsLatLon <-  friendsLatLon[ colFriendsPostsLoc_id %in% dataMyFriends, ]  
+  
+  return (dataMyFriendsLatLon)
+}
+
+findMyFriends1 <- function (userId, friendsGraph, friendsLatLon, minFriendsToFind = 10, maxDepth = 7, currentDepth=0,friendsCountSoFar = 0, alreadySearchedEdgeIndex = logical(nrow(friendsGraph))){
+  #print(paste("------", "friends for user , depth, friends so far", userId, currentDepth, friendsCountSoFar))
+  
+  dataMyFriendsLatLon <- getMyImmediateFriendsLatLon(userId, friendsGraph, friendsLatLon, alreadySearchedEdgeIndex)
+  friendsCountSoFar <- length(dataMyFriendsLatLon[, id]) + friendsCountSoFar 
+  #print(dataMyFriendsLatLon)
+  if ( friendsCountSoFar < minFriendsToFind){
+    colfriendsGraph_Id = friendsGraph[, id]
+    colfriendsGraph_friendId = friendsGraph[, friendsId]
+    dataMyFriends <- friendsGraph[which(colfriendsGraph_Id == userId ), friendsId]
+    #print("List Of friends")
+    #print(dataMyFriends)
+    for(i in dataMyFriends){
+      friendsOfFriends <- getMyImmediateFriendsLatLon(i, friendsGraph, friendsLatLon, alreadySearchedEdgeIndex)
+      dataMyFriendsLatLon <- rbind( dataMyFriendsLatLon, friendsOfFriends ) 
+    }
+    friendsCountSoFar = length(dataMyFriendsLatLon[,id])+ friendsCountSoFar
+    #print(dataMyFriendsLatLon)
+    currentDepth = currentDepth + 1
+    
+    if ( friendsCountSoFar < minFriendsToFind){
+      if (currentDepth < maxDepth){
+        #print(paste("Depth, fiendsCOunt", currentDepth, friendsCountSoFar))
+        for(i in dataMyFriends){
+          friendsOfFriends <- findMyFriends(i, friendsGraph, friendsLatLon, minFriendsToFind, maxDepth, currentDepth,friendsCountSoFar, alreadySearchedFriends)
+          dataMyFriendsLatLon <- rbind( dataMyFriendsLatLon, friendsOfFriends ) 
+          friendsCountSoFar = length(dataMyFriendsLatLon[,id]) + friendsCountSoFar
+        }
+      }
+      
+      
+    }
+  }
+  return(dataMyFriendsLatLon)
+}
+
+
+findMyFriends <- function (userId, graphFriends, friendsLatLon, colFriendsPostsLoc_id, minFriends=10){  
+  dataMyFriendsLatLon <- data.frame()
+  
+  tryCatch({
+   v< - shortest.paths(graphFriends, v = as.character(userId) )
+   if (is.null(v)) return (friendsLatLon)
+
+   v<- t(v)  
+   v<- v[order(v[, 1]), ]
+   friends = names(v)
+
+   friends <- friends[friends %in% colFriendsPostsLoc_id & friends != userId ][1:minFriends]
+
+   dataMyFriendsLatLon <- friendsLatLon[ colFriendsPostsLoc_id %in% friends,]
+
+   return(dataMyFriendsLatLon)
+  },
+  error = function(err) {   
+    # error handler picks up where error was generated
+    print(paste("MY_ERROR:  ", userId,err))
+    return (friendsLatLon)
+  })
+  
+}
+
 
 calcMajorityFriendsLoc <- function(dataMyFriendsLatLon){
   tmpColFriendsLatLonFloored <- floor( dataMyFriendsLatLon[, c(lat, lon)])
@@ -85,8 +166,8 @@ createFriendsWeightedAvgLocation <- function(dataPosts, dataFriends, dataFriends
   
   if (is.null(dataFriendsPostsLoc )) {
     dataFriendsPostsLoc = dataPosts
+    
   }
-  
   
   
   #remove invalid coordinates
@@ -98,17 +179,22 @@ createFriendsWeightedAvgLocation <- function(dataPosts, dataFriends, dataFriends
   resCLat <- numeric(nrow(dataPosts))
   resLon <- numeric(nrow(dataPosts))
   resCLon <- numeric(nrow(dataPosts))
+  resCfndDist <- numeric(nrow(dataPosts))
   resMLon <- numeric(nrow(dataPosts))
   resMLat <- numeric(nrow(dataPosts))
   resFriendsCount <- numeric(nrow(dataPosts))
-  resfriendsDataBad <- numeric(nrow(dataPosts))
+  
   coldataFriends_Id = dataFriends[, id]
   coldataFriendsPostsLoc_id = dataFriendsPostsLoc[, id]
   totalRecords = nrow(dataPosts)
+  
+  
+  graphFriends <- graph.data.frame(dataFriends)
+  
   for( i in 1:nrow(dataPosts)){    
     
     completedSoFar = completedSoFar + 1
-    if (completedSoFar %% 1000 == 0){
+    if (completedSoFar %% 500 == 0){
       print(paste( (completedSoFar*100/totalRecords), "% completed or", completedSoFar , "records processed so far" , format(Sys.time(), "%a %b %d %X %Y")))
       
     }
@@ -119,27 +205,14 @@ createFriendsWeightedAvgLocation <- function(dataPosts, dataFriends, dataFriends
     myEarliestHr <- dataPosts[i, earliestHr]
     myLatestHr <- dataPosts[i, latestHr]
     
-    dataMyFriends <- dataFriends[which(coldataFriends_Id == userId), friendsId]
     
-    dataMyFriendsLatLon <-  dataFriendsPostsLoc[ coldataFriendsPostsLoc_id %in% dataMyFriends , c(id, earliestHr, latestHr, lat, lon)]    
+    dataMyFriendsLatLon <- findMyFriends(userId, graphFriends, dataFriendsPostsLoc, coldataFriendsPostsLoc_id) 
+    dataMyFriendsLatLon <- dataMyFriendsLatLon[ , c(id, earliestHr, latestHr, lat, lon)]  
+    
     resFriendsCount[i] <- length(dataMyFriendsLatLon[,id])
-    resfriendsDataBad[i] <- FALSE
     
-    if (resFriendsCount[i] == 0  ){
-      hasFriends = FALSE
-      #when no friends lat lon available, use all available data     
-      dataMyFriendsLatLon <- dataFriendsPostsLoc[  , c(id, earliestHr, latestHr, lat, lon)] 
-    }
-    else if (!is.null(myLat)) {
-      
-       if (resFriendsCount[i] ==1 & (abs (dataMyFriendsLatLon[,lat]-myLat) > 50||abs (dataMyFriendsLatLon[,lon]-myLon) > 100)){
-#         ## filter bad data , exactly one friend and big diff in locations    
-         hasFriends = FALSE        
-         dataMyFriendsLatLon <- dataFriendsPostsLoc[  , c(id, earliestHr, latestHr, lat, lon)] 
-         resfriendsDataBad[i] = TRUE
-       }
-      
-    }
+    
+    
     
     
     
@@ -154,22 +227,17 @@ createFriendsWeightedAvgLocation <- function(dataPosts, dataFriends, dataFriends
     
     
     tmpColSumDistance <-  abs(myEarliestHr - tempColMyFriendsEarliestHr) + abs(myLatestHr - tempColMyFriendsLatestHr) 
+    resCfndDist[i] <- clocklat.min(tmpColSumDistance)
+    indexOfClosestFriend = which( tmpColSumDistance == clocklat.min(tmpColSumDistance) )
+    resCLon[i] <-clocklat.mean (dataMyFriendsLatLon[indexOfClosestFriend, lon ])
+    resCLat[i] <-clocklat.mean ( dataMyFriendsLatLon[indexOfClosestFriend, lat ]    )
     
-    indexOfClosestFriend = which( tmpColSumDistance == clocklat.min(tmpColSumDistance) )[1]
-    resCLon[i] <-dataMyFriendsLatLon[indexOfClosestFriend, lon ]
-    resCLat[i] <- dataMyFriendsLatLon[indexOfClosestFriend, lat ]
+    #MajorityFriends
+    result <- calcMajorityFriendsLoc(dataMyFriendsLatLon)
     
-    #Calc majority of friends
-    if (hasFriends) {
-      result <- calcMajorityFriendsLoc(dataMyFriendsLatLon)
-      
-      resMLat[i] = result[1]
-      resMLon[i] = result[2]     
-    }
-    else {
-      resMLon[i] = resCLon[i]
-      resMLat[i] = resCLat[i]
-    }
+    resMLat[i] = result[1]
+    resMLon[i] = result[2]     
+    
   }
   
   dataPosts[, avgFriendsLat] <- resLat
@@ -179,7 +247,7 @@ createFriendsWeightedAvgLocation <- function(dataPosts, dataFriends, dataFriends
   dataPosts[, majorityFriendsLat] <- resMLat
   dataPosts[, majorityFriendsLon] <- resMLon
   dataPosts[, friendsCount] <- resFriendsCount
-  dataPosts[, friendsDataBad] <- resfriendsDataBad
+  dataPosts[, closestFriendFeatureDistance] <- resCfndDist
   return(dataPosts)
   
 }

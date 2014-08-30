@@ -9,7 +9,7 @@ calcLinearRegression<- function(postsData, testData, outDir){
   factors <- paste(c(hour1,hour2, hour3, posts),collapse="+")
   
   ## latitude
-  formula <- as.formula(paste(paste(lat,"~"),factors))
+  formula <- as.formula(paste(paste(closestFriendLat,"~"),factors))
   print("Formula for lat used: ")
   print(formula)
   lm_model <-lm(formula, data= postsData)
@@ -18,7 +18,7 @@ calcLinearRegression<- function(postsData, testData, outDir){
  
   
   #longitude 
-  formula <- as.formula(paste(paste(lon,"~"),factors))
+  formula <- as.formula(paste(paste(closestFriendLon,"~"),factors))
   print("Formula for longitude used: ")
   print(formula)
   lm_model <-lm(formula, data= postsData)
