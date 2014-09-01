@@ -17,8 +17,8 @@ options(echo=FALSE)
 trainRunOnly = FALSE
 ##Options for train run only
 TRAINSIZE = 100
-TESTSIZE = 1
-RUNS = 1
+TESTSIZE = 10
+RUNS = 10
 ##
 #ModelFunctions
 calcFunctions <- list("LinearRegressionOnFriendsList"=calcLinearRegressionOnFriendsList, "BaggedRegression"=calcBaggedRegression)
@@ -82,8 +82,18 @@ for(i in 1:RUNS){
   plotModel(trainDataPosts, outDir)
   
   #transform features
-  transformedTrainData <- transformTrainFeatures(trainDataPosts,trainDataFriends, outDir)
-  transformedTestData <- transformTestFeatures(testDataPosts, trainDataFriends, transformedTrainData, outDir)
+  if (trainRunOnly){ 
+    friendsLoc <- transformBasicFeatures(fullTrainDataPosts)
+    transformedTrainData <- transformTrainFeatures(trainDataPosts,trainDataFriends, outDir, friendsLoc)
+    transformedTestData <- transformTestFeatures(testDataPosts, trainDataFriends, friendsLoc, outDir)
+    
+    
+  }else{
+    transformedTrainData <- transformTrainFeatures(trainDataPosts,trainDataFriends, outDir)
+    transformedTestData <- transformTestFeatures(testDataPosts, trainDataFriends, transformedTrainData, outDir)
+    
+  
+  }
   plotTransformedModel(transformedTrainData, outDir)
   
   #predictions

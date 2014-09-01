@@ -67,7 +67,7 @@ plotModel <- function(dataset, outDir){
   
   
   dev.off()
-  print("Complete")
+
 }
 
 

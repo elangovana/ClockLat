@@ -206,14 +206,16 @@ createFriendsWeightedAvgLocation <- function(dataPosts, dataFriends, dataFriends
     myLatestHr <- dataPosts[i, latestHr]
     
     
-    dataMyFriendsLatLon <- findMyFriends(userId, graphFriends, dataFriendsPostsLoc, coldataFriendsPostsLoc_id) 
-    dataMyFriendsLatLon <- dataMyFriendsLatLon[ , c(id, earliestHr, latestHr, lat, lon)]  
-    
+    #dataMyFriendsLatLon <- findMyFriends(userId, graphFriends, dataFriendsPostsLoc, coldataFriendsPostsLoc_id) 
+    dataMyFriends <- dataFriends[which(coldataFriends_Id == userId), friendsId]
+
+    dataMyFriendsLatLon <-  dataFriendsPostsLoc[ coldataFriendsPostsLoc_id %in% dataMyFriends , c(id, earliestHr, latestHr, lat, lon)]    
     resFriendsCount[i] <- length(dataMyFriendsLatLon[,id])
-    
-    
-    
-    
+    if (resFriendsCount[i]  == 0 ){
+      #when no friends lat lon available, use all available data    
+      dataMyFriendsLatLon <- dataFriendsPostsLoc[  , c(id, earliestHr, latestHr, lat, lon)] 
+    }
+    dataMyFriendsLatLon <- dataMyFriendsLatLon[ , c(id, earliestHr, latestHr, lat, lon)]  
     
     
     resLon[i] <- clocklat.mean(dataMyFriendsLatLon[, lon]) 
@@ -252,12 +254,19 @@ createFriendsWeightedAvgLocation <- function(dataPosts, dataFriends, dataFriends
   
 }
 
-transformTrainFeatures <- function(dataPosts, dataFriends, outDir){
-  data <- CleanInvalidData(dataPosts)
-  data <- createFeatureMaxMin(data)  
-  data <- createFeatureAvgTotal(data)
-  data <- createContinents(data)
-  data <- createFriendsWeightedAvgLocation(data, dataFriends)
+transformBasicFeatures <- function(dataPosts){
+  datafl <- CleanInvalidData(dataPosts) 
+  datafl <- createFeatureMaxMin(datafl)  
+  datafl <- createFeatureAvgTotal(datafl)
+  datafl <- createContinents(datafl)
+  
+  return(datafl)
+}
+
+transformTrainFeatures <- function(dataPosts, dataFriends, outDir, dataFriendsLoc = NULL){
+  data <- transformBasicFeatures(dataPosts)
+  data <- createFriendsWeightedAvgLocation(data, dataFriends, dataFriendsLoc)
+ 
   
   write.table(data,  file= file.path(outDir, "transformedData.csv"),  row.names = FALSE, sep=",", quote = FALSE)  
   return(data) 
