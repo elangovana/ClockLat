@@ -71,7 +71,7 @@ calcLinearRegressionOnFriendsList <- function(postsData,  testData, outDir){
 }
 
 calcLinearRegressionLatOnFriendsList<- function(postsData,  testData, outDir, fileName="latFittedModelFriend.pdf"){
-  factors <- paste(c(majorityFriendsLat),collapse="+")
+  factors <- paste(c(closestFriendsLat),collapse="+")
   formula <- as.formula(paste(paste(lat,"~"),factors))
   print("Formula for lat used: ")
   print(formula)
@@ -84,7 +84,7 @@ calcLinearRegressionLatOnFriendsList<- function(postsData,  testData, outDir, fi
 }
 
 calcLinearRegressionLonOnFriendsList<- function(postsData,  testData, outDir, filename="lonFittedModelFriend.pdf"){
-  factors <- paste(c(majorityFriendsLon, earliestHr),collapse="+")
+  factors <- paste(c(closestFriendsLon, earliestHr),collapse="+")
   formula <- as.formula(paste(paste(lon,"~"),factors))
   print("Formula for longitude used: ")
   print(formula)

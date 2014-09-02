@@ -7,21 +7,21 @@ source("./LinRegwithSVM.R")
 source("./TransformFeature.R")
 source("./BaggingWithLinearRegressionModel.r")
 
-
+source("./KnnRegression.r")
 
 ##########################
 ## Main #################
 ##########################
 options(echo=FALSE)
 #options( warn = 2 )
-trainRunOnly = FALSE
+trainRunOnly = TRUE
 ##Options for train run only
-TRAINSIZE = 100
-TESTSIZE = 10
-RUNS = 10
+TRAINSIZE = 10000
+TESTSIZE = 100
+RUNS = 1
 ##
 #ModelFunctions
-calcFunctions <- list("LinearRegressionOnFriendsList"=calcLinearRegressionOnFriendsList, "BaggedRegression"=calcBaggedRegression)
+calcFunctions <- list("LinearRegressionOnFriendsList"=calcLinearRegressionOnFriendsList, "BaggedRegression"=calcBaggedRegression, "KnnRegression"=calcKnn)
 ##
 args<-commandArgs(trailingOnly = TRUE)
 
