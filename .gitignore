@@ -13,3 +13,6 @@ report/reportlatex/Report.log
 report/reportlatex/Report.pdf
 report/reportlatex/Report.synctex.gz
 report/reportlatex/Report.toc
+Report.bbl
+Report.blg
+Report/reportlatex/sections/*.log

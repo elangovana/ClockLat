@@ -123,17 +123,8 @@
 
 \begin{document}
 
-\maketitle
 
-%----------------------------------------------------------------------------------------
-%	TABLE OF CONTENTS
-%----------------------------------------------------------------------------------------
-
-%\setcounter{tocdepth}{1} % Uncomment this line if you don't want subsections listed in the ToC
-
-\newpage
-\tableofcontents
-\newpage
+% \input sections/TitleAndToc.tex
 
 \input sections/section1.tex
 
@@ -142,5 +133,15 @@
 
 %--------------------------------------------
 
+\label{Bibliography}
+
+\lhead{\emph{Bibliography}} % Change the page header to say "Bibliography"
+
+
+
+\bibliography{Bibliography} % The references (bibliography) information are stored in the file named "Bibliography.bib"
+\bibliographystyle{apalike} 
+
+\end{document} 
 
 \end{document}
