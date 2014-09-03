@@ -218,8 +218,8 @@ createFriendsWeightedAvgLocation <- function(dataPosts, dataFriends, dataFriends
     dataMyFriendsLatLon <- dataMyFriendsLatLon[ , c(id, earliestHr, latestHr, lat, lon)]  
     
     
-    resLon[i] <- clocklat.mean(dataMyFriendsLatLon[, lon]) 
-    resLat[i] <- clocklat.mean(dataMyFriendsLatLon[, lat]) 
+    resLon[i] <- clocklat.median(dataMyFriendsLatLon[, lon]) 
+    resLat[i] <- clocklat.median(dataMyFriendsLatLon[, lat]) 
     
     tempColMyFriendsEarliestHr  = dataMyFriendsLatLon[, earliestHr]
     tempColMyFriendsLatestHr  = dataMyFriendsLatLon[, latestHr]
@@ -231,8 +231,8 @@ createFriendsWeightedAvgLocation <- function(dataPosts, dataFriends, dataFriends
     tmpColSumDistance <-  abs(myEarliestHr - tempColMyFriendsEarliestHr) + abs(myLatestHr - tempColMyFriendsLatestHr) 
     resCfndDist[i] <- clocklat.min(tmpColSumDistance)
     indexOfClosestFriend = which( tmpColSumDistance == clocklat.min(tmpColSumDistance) )
-    resCLon[i] <-clocklat.mean (dataMyFriendsLatLon[indexOfClosestFriend, lon ])
-    resCLat[i] <-clocklat.mean ( dataMyFriendsLatLon[indexOfClosestFriend, lat ]    )
+    resCLon[i] <-clocklat.median (dataMyFriendsLatLon[indexOfClosestFriend, lon ])
+    resCLat[i] <-clocklat.median ( dataMyFriendsLatLon[indexOfClosestFriend, lat ]    )
     
     #MajorityFriends
     result <- calcMajorityFriendsLoc(dataMyFriendsLatLon)
