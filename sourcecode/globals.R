@@ -49,6 +49,10 @@ clocklat.sum <- function(x){
   sum(x, na.rm = TRUE)
 }
 
+clocklat.median <- function(x){
+  median(x,na.rm=TRUE)
+}
+
 writePredicationAsCsv <- function(testData, predicted_lat, predicted_lon, outdir, filenamePrefix){
   createDir(outDir)
   
