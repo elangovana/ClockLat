@@ -20,7 +20,8 @@ calcBaggedRegression <- function(postsData, testData, outDir){
 
   
   ## lon
-  factors <- paste(c(closestFriendsLon),collapse="+")
+  newcol<- postsData$latestHr + postsData$earliestHr
+  factors <- paste(c(closestFriendsLon, newcol),collapse="+")
   formula <- as.formula(paste(paste(lon,"~"),factors))
   
   mod <- bagging(formula, nbagg=50, data=postsData, coob=TRUE, ns=ns)
