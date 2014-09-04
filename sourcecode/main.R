@@ -16,8 +16,8 @@ options(echo=FALSE)
 #options( warn = 2 )
 trainRunOnly = TRUE
 ##Options for train run only
-TRAINSIZE = 10000
-TESTSIZE = 100
+TRAINSIZE = 20000
+TESTSIZE = 1000
 RUNS = 1
 ##
 #ModelFunctions
