@@ -123,7 +123,7 @@ findMyFriends <- function (userId, graphFriends, friendsLatLon, colFriendsPostsL
   dataMyFriendsLatLon <- data.frame()
   
   tryCatch({
-   v< - shortest.paths(graphFriends, v = as.character(userId) )
+   v <- shortest.paths(graphFriends, v = as.character(userId) )
    if (is.null(v)) return (friendsLatLon)
 
    v<- t(v)  
@@ -180,8 +180,18 @@ createFriendsWeightedAvgLocation <- function(dataPosts, dataFriends, dataFriends
   resLon <- numeric(nrow(dataPosts))
   resCLon <- numeric(nrow(dataPosts))
   resCfndDist <- numeric(nrow(dataPosts))
-  resMLon <- numeric(nrow(dataPosts))
+  resMLon <- numeric(nrow(dataPosts)) 
   resMLat <- numeric(nrow(dataPosts))
+  resF1Lat <- numeric(nrow(dataPosts))
+  resF1Lon <- numeric(nrow(dataPosts))
+  resF2Lat <- numeric(nrow(dataPosts))
+  resF2Lon <- numeric(nrow(dataPosts))
+  resF3Lat <- numeric(nrow(dataPosts))
+  resF3Lon <- numeric(nrow(dataPosts))
+  resF4Lat <- numeric(nrow(dataPosts))
+  resF4Lon <- numeric(nrow(dataPosts))
+  resF5Lat <- numeric(nrow(dataPosts))
+  resF5Lon <- numeric(nrow(dataPosts))
   resFriendsCount <- numeric(nrow(dataPosts))
   
   coldataFriends_Id = dataFriends[, id]
@@ -204,22 +214,68 @@ createFriendsWeightedAvgLocation <- function(dataPosts, dataFriends, dataFriends
     userId <- dataPosts[i,id]
     myEarliestHr <- dataPosts[i, earliestHr]
     myLatestHr <- dataPosts[i, latestHr]
-    
-    
+    myPosts <- dataPosts[i, posts]
+  
     #dataMyFriendsLatLon <- findMyFriends(userId, graphFriends, dataFriendsPostsLoc, coldataFriendsPostsLoc_id) 
     dataMyFriends <- dataFriends[which(coldataFriends_Id == userId), friendsId]
 
-    dataMyFriendsLatLon <-  dataFriendsPostsLoc[ coldataFriendsPostsLoc_id %in% dataMyFriends , c(id, earliestHr, latestHr, lat, lon)]    
+    dataMyFriendsLatLon <-  dataFriendsPostsLoc[ coldataFriendsPostsLoc_id %in% dataMyFriends , c(id, earliestHr, latestHr, lat, lon, posts)]    
     resFriendsCount[i] <- length(dataMyFriendsLatLon[,id])
     if (resFriendsCount[i]  == 0 ){
       #when no friends lat lon available, use all available data    
-      dataMyFriendsLatLon <- dataFriendsPostsLoc[  , c(id, earliestHr, latestHr, lat, lon)] 
+      #dataMyFriendsLatLon <- dataFriendsPostsLoc[  , c(id, earliestHr, latestHr, lat, lon)] 
+      dataMyFriendsLatLon <- findMyFriends(userId, graphFriends, dataFriendsPostsLoc, coldataFriendsPostsLoc_id) 
+      
+   
     }
-    dataMyFriendsLatLon <- dataMyFriendsLatLon[ , c(id, earliestHr, latestHr, lat, lon)]  
+    dataMyFriendsLatLon <- dataMyFriendsLatLon[ , c(id, earliestHr, latestHr, lat, lon, posts)]  
+    dataMyFriendsLatLon$distEarliestHr <- abs( dataMyFriendsLatLon[, earliestHr] - myEarliestHr)
+   
+    dataMyFriendsLatLon$distPosts <- abs( dataMyFriendsLatLon[, posts] - myPosts)
+    dataMyFriendsLatLon <- dataMyFriendsLatLon[order(dataMyFriendsLatLon$distEarliestHr, dataMyFriendsLatLon$distPosts),]
+    if (length(dataMyFriendsLatLon[,id]) > 0) {
+      resF1Lat[i] = ( dataMyFriendsLatLon[1,lat] )
+      resF1Lon[i] = (dataMyFriendsLatLon[1,lon]) 
+    }
     
+    if (length(dataMyFriendsLatLon[,id]) > 1) {
+      resF2Lat[i] = (dataMyFriendsLatLon[2,lat]) 
+      resF2Lon[i] = (dataMyFriendsLatLon[2,lon]) 
+    }
+    else{
+      resF2Lat[i] =  resF1Lat[i]
+      resF2Lon[i]= resF1Lon[i]
+    }
     
-    resLon[i] <- clocklat.median(dataMyFriendsLatLon[, lon]) 
-    resLat[i] <- clocklat.median(dataMyFriendsLatLon[, lat]) 
+    if (length(dataMyFriendsLatLon[,id]) > 2) {
+      resF3Lat[i] = (dataMyFriendsLatLon[3,lat]) 
+      resF3Lon[i] = (dataMyFriendsLatLon[3,lon]) 
+    }
+    else{
+      resF3Lat[i] =  resF2Lat[i] 
+      resF3Lon[i]= resF2Lon[i] 
+    }
+    
+    if (length(dataMyFriendsLatLon[,id]) > 3) {
+      resF4Lat[i] = (dataMyFriendsLatLon[4,lat]) 
+      resF4Lon[i] = (dataMyFriendsLatLon[4,lon]) 
+    }
+    else{
+      resF4Lat[i] =  resF3Lat[i] 
+      resF4Lon[i]= resF3Lon[i] 
+    }
+   
+    if (length(dataMyFriendsLatLon[,id]) > 4) {
+      resF5Lat[i] = (dataMyFriendsLatLon[5,lat]) 
+      resF5Lon[i] = (dataMyFriendsLatLon[5,lon]) 
+    }
+    else{
+      resF5Lat[i] =  resF4Lat[i] 
+      resF5Lon[i]= resF4Lon[i] 
+    }
+    
+    resLon[i] <- clocklat.mean(dataMyFriendsLatLon[, lon]) 
+    resLat[i] <- clocklat.mean(dataMyFriendsLatLon[, lat]) 
     
     tempColMyFriendsEarliestHr  = dataMyFriendsLatLon[, earliestHr]
     tempColMyFriendsLatestHr  = dataMyFriendsLatLon[, latestHr]
@@ -232,7 +288,7 @@ createFriendsWeightedAvgLocation <- function(dataPosts, dataFriends, dataFriends
     resCfndDist[i] <- clocklat.min(tmpColSumDistance)
     indexOfClosestFriend = which( tmpColSumDistance == clocklat.min(tmpColSumDistance) )
     resCLon[i] <-clocklat.median (dataMyFriendsLatLon[indexOfClosestFriend, lon ])
-    resCLat[i] <-clocklat.median ( dataMyFriendsLatLon[indexOfClosestFriend, lat ]    )
+    resCLat[i] <-clocklat.median ( dataMyFriendsLatLon[indexOfClosestFriend, lat ])
     
     #MajorityFriends
     result <- calcMajorityFriendsLoc(dataMyFriendsLatLon)
@@ -250,6 +306,16 @@ createFriendsWeightedAvgLocation <- function(dataPosts, dataFriends, dataFriends
   dataPosts[, majorityFriendsLon] <- resMLon
   dataPosts[, friendsCount] <- resFriendsCount
   dataPosts[, closestFriendFeatureDistance] <- resCfndDist
+  dataPosts[, friend1Lat] <- resF1Lat
+  dataPosts[, friend1Lon] <- resF1Lon
+  dataPosts[, friend2Lat] <- resF2Lat
+  dataPosts[, friend2Lon] <- resF2Lon
+  dataPosts[, friend3Lat] <- resF3Lat
+  dataPosts[, friend3Lon] <- resF3Lon
+  dataPosts[, friend4Lat] <- resF4Lat
+  dataPosts[, friend4Lon] <- resF4Lon
+  dataPosts[, friend5Lat] <- resF5Lat
+  dataPosts[, friend5Lon] <- resF5Lon
   return(dataPosts)
   
 }

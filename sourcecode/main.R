@@ -14,14 +14,15 @@ source("./KnnRegression.r")
 ##########################
 options(echo=FALSE)
 #options( warn = 2 )
-trainRunOnly = TRUE
+trainRunOnly = FALSE
 ##Options for train run only
-TRAINSIZE = 20000
-TESTSIZE = 1000
-RUNS = 1
+TRAINSIZE = 1000
+TESTSIZE = 10
+RUNS = 5
 ##
 #ModelFunctions
-calcFunctions <- list("LinearRegressionOnFriendsList"=calcLinearRegressionOnFriendsList, "BaggedRegression"=calcBaggedRegression, "KnnRegression"=calcKnn)
+#calcFunctions <- list("LinearRegressionOnFriendsList"=calcLinearRegressionOnFriendsList, "BaggedRegression"=calcBaggedRegression, "KnnRegression"=calcKnn)
+calcFunctions <- list("LinearRegressionOnFriendsList"=calcLinearRegressionOnFriendsList, "BaggedRegression"=calcBaggedRegression)
 ##
 args<-commandArgs(trailingOnly = TRUE)
 

@@ -11,7 +11,7 @@ calcBaggedRegression <- function(postsData, testData, outDir){
   ns <- floor (2*length(postsData[,id])/3)
   print(ns)
   ## latitude
-  factors <- paste(c(closestFriendsLat),collapse="+")
+  factors <- paste(c( avgFriendsLat, majorityFriendsLat, friend1Lat, friend2Lat, friend3Lat, posts),collapse="+")
   formula <- as.formula(paste(paste(lat,"~"),factors))
   
   mod <- bagging(formula, nbagg=50, data=postsData, coob=TRUE, ns = ns)
@@ -21,7 +21,7 @@ calcBaggedRegression <- function(postsData, testData, outDir){
   
   ## lon
   newcol<- postsData$latestHr + postsData$earliestHr
-  factors <- paste(c(closestFriendsLon, newcol),collapse="+")
+  factors <- paste(c( avgFriendsLon, majorityFriendsLon, friend1Lon, friend2Lon, friend3Lon, posts, earliestHr),collapse="+")
   formula <- as.formula(paste(paste(lon,"~"),factors))
   
   mod <- bagging(formula, nbagg=50, data=postsData, coob=TRUE, ns=ns)
